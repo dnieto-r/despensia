@@ -1,0 +1,182 @@
+{
+	"info": {
+		"_postman_id": "99895903-5cc0-49e2-ac91-59f63036ddb4",
+		"name": "Despensia",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4918427"
+	},
+	"item": [
+		{
+			"name": "RECETAS - GENERAR",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"ingredientes\": [\"setas\", \"nata\", \"sal\", \"arroz\"],\n  \"equipamiento\": [\"olla grande\", \"colador\"],\n  \"dificultad\": \"media\",\n  \"duracion\": \"30 minutos\",\n  \"intolerancias\": [\"Lactosa\"],\n  \"perfil\": \"basico\",\n  \"comensales\": \"3\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8000/generar",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8000",
+					"path": [
+						"generar"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "RECETAS - VER TODAS",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Guardar el título de la primera receta en una variable\", function() {",
+							"    var jsonData = pm.response.json();",
+							"    pm.environment.set(\"titulo_receta\", jsonData[0].titulo);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://0.0.0.0:8000/recetas",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8000",
+					"path": [
+						"recetas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "RECETAS - VER FAV",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Guardar el título de la primera receta en una variable\", function() {",
+							"    var jsonData = pm.response.json();",
+							"    pm.environment.set(\"titulo_receta\", jsonData[0].titulo);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://0.0.0.0:8000/recetas/favoritas",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8000",
+					"path": [
+						"recetas",
+						"favoritas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "FAVORITAS - AGREGAR",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"titulo\": \"{{titulo_receta}}\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8000/recetas/favoritas/agregar",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8000",
+					"path": [
+						"recetas",
+						"favoritas",
+						"agregar"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "FAVORITAS - BORRAR",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"titulo\": \"{{titulo_receta}}\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8000/recetas/favoritas/borrar",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8000",
+					"path": [
+						"recetas",
+						"favoritas",
+						"borrar"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

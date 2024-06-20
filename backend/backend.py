@@ -124,7 +124,7 @@ def generar_receta():
         imagen = imagen_mock
     else:
         receta_descripcion = receta["descripcion"]
-        prompt_imagen = f"Quiero una imagen de la receta {receta_descripcion} con el fondo blanco, en un plato negro y con efecto realista"
+        prompt_imagen = f"Quiero una imagen de la receta {receta_descripcion} en un plato negro y con efecto realista."
         print(prompt_imagen)
         imagen = consultar_azure_openai(prompt_imagen, AZURE_ENDPOINT_IMAGES, AZURE_OPENAI_KEY_IMAGES, 'image')
     url_imagen = imagen['data'][0]['url']
