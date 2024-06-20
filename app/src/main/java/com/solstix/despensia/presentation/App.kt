@@ -1,5 +1,6 @@
 package com.solstix.despensia.presentation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -14,7 +15,10 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,6 +27,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.solstix.despensia.presentation.screen.FavoriteScreen
+import com.solstix.despensia.presentation.screen.IngredientItem
 import com.solstix.despensia.presentation.screen.PantryScreen
 import com.solstix.despensia.presentation.screen.SettingsScreen
 import com.solstix.despensia.presentation.viewmodel.HomeViewModel
@@ -31,11 +36,23 @@ import com.solstix.despensia.presentation.viewmodel.HomeViewModel
 fun App() {
     val navController = rememberNavController()
     val viewModel = hiltViewModel<HomeViewModel>()
+    val itemList = remember { mutableStateListOf<IngredientItem>() }
+
+    fun addIngredient(item: IngredientItem) {
+        itemList.add(item)
+    }
+
+    fun removeIngredient(item: IngredientItem) {
+        itemList.remove(item)
+    }
 
     Column (Modifier.fillMaxSize()) {
         NavHost(navController = navController, startDestination = BottomNavItem.Pantry.route, modifier = Modifier.weight(1f)) {
             composable(BottomNavItem.Pantry.route) {
                 PantryScreen(
+                    itemList,
+                    ::addIngredient,
+                    ::removeIngredient,
                     navController
                 )
             }
@@ -68,7 +85,7 @@ fun BottomNavigationBar(modifier: Modifier, navController: NavController) {
         BottomNavItem.Settings
     )
     var selectedItem: BottomNavItem? = null
-    BottomAppBar {
+    BottomAppBar() {
         NavigationBar(
             modifier = modifier
         ) {
@@ -77,7 +94,8 @@ fun BottomNavigationBar(modifier: Modifier, navController: NavController) {
                     selected = selectedItem == item,
                     onClick = {
                         selectedItem = item
-                        navController.navigate(item.route) },
+                        navController.navigate(item.route)
+                      },
                     icon = { Icon(item.icon, contentDescription = "Home") },
                     label = { Text(item.label) }
                 )
