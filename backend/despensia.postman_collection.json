@@ -21,15 +21,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://0.0.0.0:8000/generar",
+					"raw": "http://{{despensia_server}}:{{despensia_port}}/generar",
 					"protocol": "http",
 					"host": [
-						"0",
-						"0",
-						"0",
-						"0"
+						"{{despensia_server}}"
 					],
-					"port": "8000",
+					"port": "{{despensia_port}}",
 					"path": [
 						"generar"
 					]
@@ -58,15 +55,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://0.0.0.0:8000/recetas",
+					"raw": "http://{{despensia_server}}:{{despensia_port}}/recetas",
 					"protocol": "http",
 					"host": [
-						"0",
-						"0",
-						"0",
-						"0"
+						"{{despensia_server}}"
 					],
-					"port": "8000",
+					"port": "{{despensia_port}}",
 					"path": [
 						"recetas"
 					]
@@ -95,15 +89,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://0.0.0.0:8000/recetas/favoritas",
+					"raw": "http://{{despensia_server}}:{{despensia_port}}/recetas/favoritas",
 					"protocol": "http",
 					"host": [
-						"0",
-						"0",
-						"0",
-						"0"
+						"{{despensia_server}}"
 					],
-					"port": "8000",
+					"port": "{{despensia_port}}",
 					"path": [
 						"recetas",
 						"favoritas"
@@ -127,15 +118,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://0.0.0.0:8000/recetas/favoritas/agregar",
+					"raw": "http://{{despensia_server}}:{{despensia_port}}/recetas/favoritas/agregar",
 					"protocol": "http",
 					"host": [
-						"0",
-						"0",
-						"0",
-						"0"
+						"{{despensia_server}}"
 					],
-					"port": "8000",
+					"port": "{{despensia_port}}",
 					"path": [
 						"recetas",
 						"favoritas",
@@ -160,15 +148,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://0.0.0.0:8000/recetas/favoritas/borrar",
+					"raw": "http://{{despensia_server}}:{{despensia_port}}/recetas/favoritas/borrar",
 					"protocol": "http",
 					"host": [
-						"0",
-						"0",
-						"0",
-						"0"
+						"{{despensia_server}}"
 					],
-					"port": "8000",
+					"port": "{{despensia_port}}",
 					"path": [
 						"recetas",
 						"favoritas",
