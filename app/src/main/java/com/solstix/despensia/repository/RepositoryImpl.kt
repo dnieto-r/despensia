@@ -11,17 +11,25 @@ class RepositoryImpl @Inject constructor(
     private val apiService: ApiService
 ) : Repository {
 
-    override suspend fun getRecipes(ingredients: List<String>): ApiState<RecipesDto> = try {
+    override suspend fun getRecipes(
+        ingredients: List<String>,
+        difficulty: String,
+        duration: String,
+        intolerances: List<String>,
+        utensils: List<String>,
+        chefLevel: String,
+        diners: String
+    ): ApiState<RecipesDto> = try {
         ApiState.Success(
             apiService.getRecipes(
                 IngredientsBody(
-                    dificultad = "facil",
-                    duracion = "30",
-                    equipamiento = listOf("sarten"),
+                    dificultad = difficulty,
+                    duracion = duration,
+                    equipamiento = utensils,
                     ingredientes = ingredients,
-                    intolerancias = listOf("gluten"),
-                    perfil = "intermedio",
-                    comensales = "2"
+                    intolerancias = intolerances,
+                    perfil = chefLevel,
+                    comensales = diners
             )
             ))
     } catch (e: Exception) {

@@ -33,13 +33,13 @@ import androidx.navigation.NavController
 @Composable
 fun SettingsScreen(
     navController: NavController,
-    chefLevel: String = "Básico",
+    chefLevel: String = "Basico",
     setChefLevel: (String) -> Unit,
     utensils: List<String> = emptyList(),
     setUtensils: (List<String>) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val difficultyList = arrayOf("Básico", "Intermedio", "Avanzado")
+    val difficultyList = arrayOf("Basico", "Intermedio", "Avanzado")
     var selectedLevel by remember { mutableStateOf(chefLevel) }
     val isHorno = remember { mutableStateOf(false) }
     val isSarten = remember { mutableStateOf(false) }

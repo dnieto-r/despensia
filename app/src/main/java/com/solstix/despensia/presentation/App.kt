@@ -46,8 +46,8 @@ fun App() {
     val itemList = remember { mutableStateListOf<IngredientItem>() }
 
 
-    var chefLevel by remember { mutableStateOf("Básico") }
-    val utensils = remember { mutableStateListOf<String>() }
+    var chefLevel by remember { mutableStateOf("Basico") }
+    val utensils = remember { mutableStateListOf<String>("horno", "batidora", "sarten", "olla express", "microondas") }
 
     fun setChefLevel(value: String) {
         chefLevel = value
@@ -125,7 +125,7 @@ fun App() {
                 val recipeObject = recipeObjectJson?.let { jsonAdapter.fromJson(it) }
 
                 if (recipeObject != null) {
-                    RecipesFormScreen(navController = navController, ingredients = recipeObject, viewModel = viewModel)
+                    RecipesFormScreen(navController = navController, ingredients = recipeObject, viewModel = viewModel, utensils = utensils, chefLevel = chefLevel)
                 }
             }
         }

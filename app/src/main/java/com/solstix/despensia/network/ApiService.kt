@@ -4,14 +4,13 @@ import com.solstix.despensia.model.RecipesDto
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import retrofit2.http.Body
-import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface ApiService {
-    @POST("generar") // TODO: Set API Endpoint
+    @POST("generar")
     suspend fun getRecipes(
         @Body ingredients: IngredientsBody
-    ): RecipesDto // TODO: Set API Response
+    ): RecipesDto
 }
 
 @JsonClass(generateAdapter = true)

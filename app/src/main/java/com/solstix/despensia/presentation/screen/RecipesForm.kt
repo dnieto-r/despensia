@@ -52,6 +52,8 @@ fun RecipesFormScreen(
     navController: NavController,
     ingredients: List<IngredientItem>,
     viewModel: HomeViewModel,
+    utensils: List<String>,
+    chefLevel: String
 ) {
     var expanded by remember { mutableStateOf(false) }
     val difficultyList = arrayOf("Baja", "Media", "Alta")
@@ -59,8 +61,8 @@ fun RecipesFormScreen(
     val isLactosa = remember { mutableStateOf(false) }
     val isMarisco = remember { mutableStateOf(false) }
     val isGluten = remember { mutableStateOf(false) }
-    var duration by remember { mutableStateOf("60") }
-    var people by remember { mutableStateOf("2") }
+    var duration by remember { mutableStateOf("") }
+    var people by remember { mutableStateOf("") }
 
     Column(
         Modifier
@@ -220,7 +222,20 @@ fun RecipesFormScreen(
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 32.dp),
             onClick = {
-                viewModel.getProductDetails(ingredients)
+                val intolerances = listOf(
+                    if (isLactosa.value) "lactosa" else "",
+                    if (isMarisco.value) "marisco" else "",
+                    if (isGluten.value) "gluten" else ""
+                )
+
+                viewModel.getProductDetails(
+                    ingredients,
+                    selectedDifficulty,
+                    intolerances,
+                    utensils,
+                    chefLevel,
+                    duration,
+                    people)
             }
         ) {
             Text(text = "Enviar")
@@ -234,7 +249,7 @@ fun RecipesFormScreen(
                 val listType = Types.newParameterizedType(List::class.java, Recipe::class.java)
                 val jsonAdapter = moshi.adapter<List<Recipe>>(listType).lenient()
                 val recipesJson = jsonAdapter.toJson(recipes.data.map())
-                navController.navigate("recipesList/$recipesJson"
+                    navController.navigate("recipesList/$recipesJson"
                 )
             }
             is ApiState.Error -> {}
