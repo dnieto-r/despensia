@@ -135,22 +135,8 @@ def generar_receta():
     receta["dificultad"] = datos_receta["dificultad"]
     receta["duracion"] = datos_receta["duracion"]
 
-    
-    # Compruebo si ya hay una receta con el mismo título
-    try:
-        if recetas[receta['titulo']]:
-            mensaje = {'error': 'La receta ya existe'}
-            return mensaje, 400
-    except KeyError:
-        # for r in recetas:
-        #     if r['titulo'] == receta['titulo']:
-        #         mensaje = {'error': 'La receta ya existe'}
-        #         return mensaje, 400
-        
-        # Si no existe, la añado a la lista de recetas (por defecto como no favorita)
-        receta["favorita"] = False
-        recetas.append(receta)
-        return receta, 200
+    return receta, 200
+
 
 @app.route('/recetas/favoritas/agregar', methods=['POST'])
 def agregar_favorita():
