@@ -8,57 +8,46 @@ app = Flask(__name__)
 
 recetas = []
 
-receta_mock = {
-	"titulo": "Título de la receta creada",
-	"descripcion": "Descripción de la receta creada",
-	"duracion": "17 minutos",
-	"dificultad": "baja/media/alta",
-	"ingredientes": [
-		"Ingrediente 01",
-		"Ingrediente 02",
-		"Ingrediente 03"
-    ],
-	"procedimiento": [
-		{
-			"titulo": "Paso 01",
-			"instrucciones": [
-				"instrucción 01",
-				"instrucción 02",
-				"instrucción 03"
-			]
-		},
-		{
-			"titulo": "Paso 02",
-			"instrucciones": [
-				"instrucción 01",
-				"instrucción 02",
-				"instrucción 03"
-			]
-		}
-	]
-}
+mock_receta = False
+mock_imagen = False
+
+receta_mock = {'titulo': 'Salmón a la Plancha con Pimienta', 'descripcion': 'Sencilla y rápida receta de salmón a la plancha con pimienta, ideal para un almuerzo ligero y saludable.', 'ingredientes': ['3 filetes de salmón', 'Sal al gusto', 'Pimienta al gusto', 'Aceite de oliva (para la plancha)'], 'procedimiento': [{'paso': 1, 'instrucciones': ['Seca los filetes de salmón con toallas de papel.']}, {'paso': 2, 'instrucciones': ['Sazona ambos lados de los filetes con sal y pimienta al gusto.']}, {'paso': 3, 'instrucciones': ['Calienta una sartén grande a fuego medio-alto y añade un poco de aceite de oliva.']}, {'paso': 4, 'instrucciones': ['Cuando el aceite esté caliente, coloca los filetes de salmón en la sartén con la piel hacia abajo.']}, {'paso': 5, 'instrucciones': ['Cocina los filetes durante 4-5 minutos o hasta que la piel esté crujiente y dorada.']}, {'paso': 6, 'instrucciones': ['Voltea los filetes y cocina por otros 3-4 minutos, hasta que estén cocidos a tu gusto.']}, {'paso': 7, 'instrucciones': ['Sirve los filetes de salmón calientes acompañados de tu guarnición preferida.']}]}
+imagen_mock = {'created': 1718902320, 'data': [{'content_filter_results': {'hate': {'filtered': False, 'severity': 'safe'}, 'self_harm': {'filtered': False, 'severity': 'safe'}, 'sexual': {'filtered': False, 'severity': 'safe'}, 'violence': {'filtered': False, 'severity': 'safe'}}, 'prompt_filter_results': {'hate': {'filtered': False, 'severity': 'safe'}, 'profanity': {'detected': False, 'filtered': False}, 'self_harm': {'filtered': False, 'severity': 'safe'}, 'sexual': {'filtered': False, 'severity': 'safe'}, 'violence': {'filtered': False, 'severity': 'safe'}}, 'revised_prompt': 'Create an appetizing image featuring a simple and quick grilled salmon recipe with pepper. The dish should appear perfect for a light and healthy lunch, with the grilled salmon emphasizing its char marks and the pepper flakes adding a touch of spice. All of this should be plated delicately to represent a nutritious meal.', 'url': 'https://dalleprodsec.blob.core.windows.net/private/images/0953f3bb-5953-49fe-9982-6930cecbc9a5/generated_00.png?se=2024-06-21T16%3A52%3A10Z&sig=7Zc5RgyDH%2BtfaxGjxxMPfZoZTePa4i%2F%2B%2Fctt0if6BQ4%3D&ske=2024-06-27T13%3A22%3A41Z&skoid=e52d5ed7-0657-4f62-bc12-7e5dbb260a96&sks=b&skt=2024-06-20T13%3A22%3A41Z&sktid=33e01921-4d64-4f8c-a055-5bdaffd5e33d&skv=2020-10-02&sp=r&spr=https&sr=b&sv=2020-10-02'}]}
 
 AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")  # Asegúrate de tener esta variable de entorno configurada
+AZURE_OPENAI_KEY_IMAGES = os.getenv("AZURE_OPENAI_KEY_IMAGES")  # Asegúrate de tener esta variable de entorno configurada
 AZURE_DOMAIN = "sosltixlicenses"
+AZURE_DOMAIN_IMAGES = "cdolicensesgpt4-v-swedenc"
 AZURE_DEPLOYMENT = "gpt-4o"
+AZURE_DEPLOYMENT_IMAGES = "dall-e"
 AZURE_VERSION = "2024-02-01"
 AZURE_ENDPOINT = f"https://{AZURE_DOMAIN}.openai.azure.com/openai/deployments/{AZURE_DEPLOYMENT}/chat/completions?api-version={AZURE_VERSION}"
+AZURE_ENDPOINT_IMAGES = f"https://{AZURE_DOMAIN_IMAGES}.openai.azure.com/openai/deployments/{AZURE_DEPLOYMENT_IMAGES}/images/generations?api-version={AZURE_VERSION}"
 
-def consultar_azure_openai(prompt):
+def consultar_azure_openai(prompt, endpoint, api_key, mode='text'):
     headers = {
         "Content-Type": "application/json",
-        "api-key": AZURE_OPENAI_KEY
+        "api-key": api_key
     }    
-    payload = {
-        "messages": [
-            {"role": "system", "content": "You are an AI assistant that helps people find information."},
-            {"role": "user", "content": prompt}
-        ]
-    }
-    response = requests.post(AZURE_ENDPOINT, headers=headers, json=payload)
+    if mode == 'image':
+        payload = {
+            "prompt": prompt,
+            "n": 1,  # Number of images to generate
+            "size": "1792x1024"  # Size of the generated images
+        }
+    else:
+        payload = {
+            "messages": [
+                {"role": "user", "content": prompt}
+            ]
+        }
+    response = requests.post(endpoint, headers=headers, json=payload)
     if response.status_code == 200:
         response_data = response.json()
-        respuesta_generada = response_data['choices'][0]['message']['content']
+        if mode == 'image':
+            respuesta_generada = response_data
+        elif mode == 'text':
+            respuesta_generada = response_data['choices'][0]['message']['content']
         return respuesta_generada
     else:
         raise Exception(f"Error en la solicitud a Azure OpenAI: {response.status_code}, {response.text}")
@@ -119,14 +108,26 @@ def generar_receta():
     # log para imprimir el prompt enviado
     print(prompt)
 
-    receta = consultar_azure_openai(prompt)
-    receta = receta.replace("```json\n", "").replace("```", "")
-
-    # convertimos a json
-    try:
-        receta = json.loads(receta)
-    except json.JSONDecodeError as e:
-        receta = {"error decode json": "No se pudo generar la receta, esperabamos un json pero la puta IA no nos dio un json."}
+    if mock_receta:
+        receta = receta_mock
+    else:
+        receta = consultar_azure_openai(prompt, AZURE_ENDPOINT, AZURE_OPENAI_KEY, 'text')
+        receta = receta.replace("```json\n", "").replace("```", "")
+        # convertimos a json
+        try:
+            receta = json.loads(receta)
+        except json.JSONDecodeError as e:
+            receta = {"error decode json": "No se pudo generar la receta, esperabamos un json pero la puta IA no nos dio un json."}
+        
+    # Generamos la imagen del plato
+    if mock_imagen:
+        imagen = imagen_mock
+    else:
+        receta_descripcion = receta["descripcion"]
+        prompt_imagen = f"Quiero una imagen de la receta {receta_descripcion} con el fondo blanco, en un plato negro y con efecto realista"
+        print(prompt_imagen)
+        imagen = consultar_azure_openai(prompt_imagen, AZURE_ENDPOINT_IMAGES, AZURE_OPENAI_KEY_IMAGES, 'image')
+    url_imagen = imagen['data'][0]['url']
     
     # loggeamos la receta generada
     print(f'LOGGER: RESPUESTA IA:\n\n {receta}')
@@ -145,6 +146,7 @@ def generar_receta():
     except KeyError:
         pass
     receta["favorita"] = False
+    receta["imagen"] = url_imagen
     recetas.append(receta)
     return receta, 200
 
