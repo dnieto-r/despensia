@@ -17,6 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.solstix.despensia.model.Pasos
+import com.squareup.moshi.Json
 
 @Composable
 fun RecipesListScreen(
@@ -71,5 +73,7 @@ data class Recipe (
     val title: String,
     val description: String,
     val duration: String,
-    val difficulty: String
+    val difficulty: String,
+    val ingredients: List<String>,
+    val steps: List<Pasos>
 )

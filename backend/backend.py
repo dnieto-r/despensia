@@ -120,10 +120,7 @@ def generar_receta():
     print(prompt)
 
     receta = consultar_azure_openai(prompt)
-    
-    # loggeamos la receta generada
-    print(f'LOGGER: RESPUESTA IA:\n\n {receta}')
-    print(f'LOGGER: TIPO DE RESPUESTA IA:\n\n {type(receta)}')
+    receta = receta.replace("```json\n", "").replace("```", "")
 
     # convertimos a json
     try:
@@ -131,26 +128,26 @@ def generar_receta():
     except json.JSONDecodeError as e:
         receta = {"error decode json": "No se pudo generar la receta, esperabamos un json pero la puta IA no nos dio un json."}
     
+    # loggeamos la receta generada
+    print(f'LOGGER: RESPUESTA IA:\n\n {receta}')
+    print(f'LOGGER: TIPO DE RESPUESTA IA:\n\n {type(receta)}')
+
     # recordamos campos que vienen de la app
     receta["dificultad"] = datos_receta["dificultad"]
     receta["duracion"] = datos_receta["duracion"]
 
-    
-    # Compruebo si ya hay una receta con el mismo título
+    titulo_receta = receta["titulo"]
+    print(titulo_receta)
     try:
-        if recetas[receta['titulo']]:
-            mensaje = {'error': 'La receta ya existe'}
-            return mensaje, 400
+        for r in recetas:
+            if r["titulo"] == titulo_receta:
+                return "Ya existe una receta con ese nombre", 400 
     except KeyError:
-        # for r in recetas:
-        #     if r['titulo'] == receta['titulo']:
-        #         mensaje = {'error': 'La receta ya existe'}
-        #         return mensaje, 400
-        
-        # Si no existe, la añado a la lista de recetas (por defecto como no favorita)
-        receta["favorita"] = False
-        recetas.append(receta)
-        return receta, 200
+        pass
+    receta["favorita"] = False
+    recetas.append(receta)
+    return receta, 200
+
 
 @app.route('/recetas/favoritas/agregar', methods=['POST'])
 def agregar_favorita():

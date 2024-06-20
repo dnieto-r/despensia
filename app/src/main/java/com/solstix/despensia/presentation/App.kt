@@ -78,7 +78,7 @@ fun App() {
                 "recipes/{recipe}"
             ) { backStackEntry ->
                 val recipeObjectJson =  backStackEntry.arguments?.getString("recipe")
-                val moshi = Moshi.Builder().build()
+                val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
                 val jsonAdapter = moshi.adapter(Recipe::class.java).lenient()
                 val recipeObject = recipeObjectJson?.let { jsonAdapter.fromJson(it) }
 
