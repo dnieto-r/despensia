@@ -8,6 +8,36 @@ app = Flask(__name__)
 
 recetas = []
 
+receta_mock = {
+	"titulo": "Título de la receta creada",
+	"descripcion": "Descripción de la receta creada",
+	"duracion": "17 minutos",
+	"dificultad": "baja/media/alta",
+	"ingredientes": [
+		"Ingrediente 01",
+		"Ingrediente 02",
+		"Ingrediente 03"
+    ],
+	"procedimiento": [
+		{
+			"titulo": "Paso 01",
+			"instrucciones": [
+				"instrucción 01",
+				"instrucción 02",
+				"instrucción 03"
+			]
+		},
+		{
+			"titulo": "Paso 02",
+			"instrucciones": [
+				"instrucción 01",
+				"instrucción 02",
+				"instrucción 03"
+			]
+		}
+	]
+}
+
 AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")  # Asegúrate de tener esta variable de entorno configurada
 AZURE_DOMAIN = "sosltixlicenses"
 AZURE_DEPLOYMENT = "gpt-4o"
@@ -32,7 +62,6 @@ def consultar_azure_openai(prompt):
         return respuesta_generada
     else:
         raise Exception(f"Error en la solicitud a Azure OpenAI: {response.status_code}, {response.text}")
-
 
 def generate_prompt(ingredientes, equipamiento, perfil, comensales, dificultad, duracion, intolerancias):
     # perfil de cocinero
@@ -82,12 +111,19 @@ def generar_receta():
             mensaje = {'error': 'Faltan datos requeridos'}
             return jsonify(mensaje), 400
         
+    assert datos_receta["perfil"] in ["basico", "intermedio", "avanzado"], "El perfil del cocinero debe ser 'basico', 'intermedio' o 'avanzado'"
+    assert datos_receta["dificultad"] in ["facil", "media", "dificil"], "La dificultad de la receta debe ser 'facil', 'media' o 'dificil'"
+
     prompt = generate_prompt(datos_receta["ingredientes"], datos_receta["equipamiento"], datos_receta["perfil"], datos_receta["comensales"], datos_receta["dificultad"], datos_receta["duracion"], datos_receta["intolerancias"])
     
     # log para imprimir el prompt enviado
     print(prompt)
 
     receta = consultar_azure_openai(prompt)
+    
+    # loggeamos la receta generada
+    print(f'LOGGER: RESPUESTA IA:\n\n {receta}')
+    print(f'LOGGER: TIPO DE RESPUESTA IA:\n\n {type(receta)}')
 
     # convertimos a json
     try:
@@ -99,82 +135,62 @@ def generar_receta():
     receta["dificultad"] = datos_receta["dificultad"]
     receta["duracion"] = datos_receta["duracion"]
 
-    # loggeamos la receta generada
-    print(receta)
-    print(type(receta))
     
-    # receta = {
-    #     "dificultad": datos_receta["dificultad"],
-    #     "duracion": datos_receta["duracion"],
-    #     "titulo": "Salmón con salsa de pera, champiñones salteados y espinacas crujientes",
-    #     "descripcion": "Una combinación innovadora que resalta los sabores del salmón con una salsa dulce de pera, acompañado de champiñones salteados y espinacas crujientes.",
-    #     "ingredientes": [
-    #         "Salmón fresco (2 filetes)",
-    #         "Peras (2 unidades)",
-    #         "Champiñones (200 g)",
-    #         "Espinacas frescas (150 g)",
-    #         "Aceite de oliva",
-    #         "Mantequilla",
-    #         "Ajo (2 dientes)",
-    #         "Caldo de verduras",
-    #         "Sal y pimienta al gusto"
-    #     ],
-    #     "procedimiento": [
-    #         {
-    #             "paso": "Preparación de la salsa de pera",
-    #             "instrucciones": [
-    #                 "Pelar y cortar las peras en trozos. En una olla, derretir una cucharada de mantequilla y añadir los trozos de pera con un poco de sal.",
-    #                 "Cocinar a fuego medio-bajo hasta que las peras estén suaves, unos 10-15 minutos.",
-    #                 "Transferir las peras cocidas a una licuadora y triturar hasta obtener una salsa suave. Si es necesario, añadir un poco de caldo de verduras para ajustar la consistencia. Reservar."
-    #             ]
-    #         },
-    #         {
-    #             "paso": "Preparación del salmón",
-    #             "instrucciones": [
-    #                 "Preparar los filetes de salmón secándolos con papel de cocina.",
-    #                 "Sazonar con sal y pimienta.",
-    #                 "En una sartén, calentar un poco de aceite de oliva a fuego medio-alto.",
-    #                 "Cocinar el salmón con la piel hacia abajo primero, durante 3-4 minutos. Luego, voltear y cocinar por otros 3-4 minutos hasta que esté cocido pero aún jugoso por dentro."
-    #             ]
-    #         },
-    #         {
-    #             "paso": "Preparación de los champiñones salteados",
-    #             "instrucciones": [
-    #                 "Lavar y cortar los champiñones en láminas.",
-    #                 "En una sartén, calentar un poco de aceite de oliva y una cucharada de mantequilla.",
-    #                 "Añadir los champiñones y cocinar a fuego medio-alto hasta que estén dorados y tiernos, unos 5-7 minutos.",
-    #                 "Sazonar con sal y pimienta al gusto. Reservar."
-    #             ]
-    #         },
-    #         {
-    #             "paso": "Preparación de las espinacas crujientes",
-    #             "instrucciones": [
-    #                 "Lavar y secar las espinacas.",
-    #                 "En una bandeja para horno, distribuir las espinacas en una capa uniforme.",
-    #                 "Rociar con un poco de aceite de oliva y sazonar con sal.",
-    #                 "Hornear a 180°C durante unos 5-7 minutos o hasta que las espinacas estén crujientes.",
-    #                 "Retirar del horno y reservar."
-    #             ]
-    #         },
-    #         {
-    #             "paso": "Armado del plato",
-    #             "instrucciones": [
-    #                 "Colocar una cama de espinacas crujientes en el centro de cada plato.",
-    #                 "Colocar encima el filete de salmón cocido.",
-    #                 "Añadir los champiñones salteados alrededor del salmón.",
-    #                 "Salsear con la salsa de pera preparada.",
-    #                 "Decorar con algunas hojas frescas de espinacas o perejil si se desea.",
-    #                 "¡Servir caliente y disfrutar!"
-    #             ]
-    #         }
-    #     ]
-    # }
+    # Compruebo si ya hay una receta con el mismo título
+    try:
+        if recetas[receta['titulo']]:
+            mensaje = {'error': 'La receta ya existe'}
+            return mensaje, 400
+    except KeyError:
+        # for r in recetas:
+        #     if r['titulo'] == receta['titulo']:
+        #         mensaje = {'error': 'La receta ya existe'}
+        #         return mensaje, 400
+        
+        # Si no existe, la añado a la lista de recetas (por defecto como no favorita)
+        receta["favorita"] = False
+        recetas.append(receta)
+        return receta, 200
 
-    return receta, 200
+@app.route('/recetas/favoritas/agregar', methods=['POST'])
+def agregar_favorita():
+    data = request.get_json()
+    titulo = data.get('titulo')
+    if not titulo:
+        return jsonify({'error': 'Falta el título de la receta en el cuerpo de la solicitud.'}), 400
+
+    for receta in recetas:
+        if receta["titulo"] == titulo:
+            receta["favorita"] = True
+            return f"{titulo} agregada a favoritos.", 200
+
+    return f"No se encontró la receta: {titulo}.", 404
+
+@app.route('/recetas/favoritas/borrar', methods=['POST'])
+def borrar_favorita():
+    data = request.get_json()
+    titulo = data.get('titulo')
+    if not titulo:
+        return jsonify({'error': 'Falta el título de la receta en el cuerpo de la solicitud.'}), 400
+
+    for receta in recetas:
+        if receta["titulo"] == titulo:
+            receta["favorita"] = False
+            return f"{titulo} ha sido eliminada de favoritos.", 200
+
+    return f"No se encontró la receta {titulo}.", 404
 
 @app.route('/recetas', methods=['GET'])
 def obtener_recetas():
-    return jsonify(recetas)
+    return recetas, 200
+
+@app.route('/recetas/favoritas', methods=['GET'])
+def obtener_recetas_favoritas():
+    recetas_favoritas = []
+    for receta in recetas:
+        if receta["favorita"]:
+            recetas_favoritas.append(receta)
+    return recetas_favoritas, 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
