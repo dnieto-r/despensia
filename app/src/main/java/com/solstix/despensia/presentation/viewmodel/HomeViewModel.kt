@@ -1,10 +1,12 @@
 package com.solstix.despensia.presentation.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.solstix.despensia.model.ImageDto
 import com.solstix.despensia.model.RecipesDto
 import com.solstix.despensia.presentation.screen.IngredientItem
 import com.solstix.despensia.repository.Repository
@@ -12,6 +14,7 @@ import com.solstix.despensia.util.ApiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,6 +24,8 @@ class HomeViewModel @Inject constructor(
 
     // TODO: Set UI State
     private val _productDetailsState: MutableState<ApiState<RecipesDto>> =
+        mutableStateOf(ApiState.Empty)
+    private val _imageDetailsState: MutableState<ApiState<ImageDto>> =
         mutableStateOf(ApiState.Empty)
     val productDetailsState: State<ApiState<RecipesDto>> get() = _productDetailsState
 
@@ -48,6 +53,22 @@ class HomeViewModel @Inject constructor(
                 diners
                 ).also {
                 _productDetailsState.value = it
+            }
+        }
+    }
+
+    fun getIngredients(
+        image: File,
+        removeImage: () -> Unit
+    ) {
+        _imageDetailsState.value = ApiState.Loading
+        viewModelScope.launch(Dispatchers.IO) {
+            Log.d("DEVUGER", "getIngredients: ${image.isFile}")
+            _imageDetailsState.value = repository.getIngredientsFromImage(
+                image
+            ).also {
+                _imageDetailsState.value = it
+                removeImage.invoke()
             }
         }
     }

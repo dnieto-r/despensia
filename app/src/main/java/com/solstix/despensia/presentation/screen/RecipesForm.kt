@@ -226,7 +226,9 @@ fun RecipesFormScreen(
                     if (isLactosa.value) "lactosa" else "",
                     if (isMarisco.value) "marisco" else "",
                     if (isGluten.value) "gluten" else ""
-                )
+                ).filter {
+                    it != ""
+                }
 
                 viewModel.getProductDetails(
                     ingredients,

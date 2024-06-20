@@ -186,7 +186,7 @@ fun PantryScreen(
                     }) {
                 AnimatedVisibility(visible = expanded) {
                     IconButton(
-                        onClick = { /* Acción del icono */ },
+                        onClick = { navController.navigate("image_selector") },
                         modifier = Modifier
                             .offset(y = iconOffset)
                             .alpha(iconAlpha)
