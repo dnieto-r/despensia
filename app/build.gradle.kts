@@ -32,9 +32,9 @@ android {
         val baseUrl = if (localPropertiesFile.exists()) {
             localProperties.load(localPropertiesFile.inputStream())
 
-            localProperties.getProperty("BASE_URL", "https://dummyjson.com/")
+            localProperties.getProperty("BASE_URL", "http://10.19.200.92:8000")
         } else {
-            "https://dummyjson.com/"
+            "http://10.19.200.92:8000"
         }
 
         /* TODO: Add base URL in local.properties file as:-
@@ -72,6 +72,7 @@ android {
 
 dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    implementation("com.squareup.moshi:moshi-kotlin:1.14.0")
 
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)

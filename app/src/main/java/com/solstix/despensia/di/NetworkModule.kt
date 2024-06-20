@@ -6,6 +6,8 @@ import com.solstix.despensia.BuildConfig
 import com.solstix.despensia.network.ApiService
 import com.solstix.despensia.repository.Repository
 import com.solstix.despensia.repository.RepositoryImpl
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,12 +37,18 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun providesRetrofit(okHttpClient: OkHttpClient): ApiService = Retrofit.Builder()
-        .baseUrl(BuildConfig.BASE_URL)
-        .addConverterFactory(MoshiConverterFactory.create())
-        .client(okHttpClient)
-        .build()
-        .create(ApiService::class.java)
+    fun providesRetrofit(okHttpClient: OkHttpClient): ApiService {
+        val moshi = Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl(BuildConfig.BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .client(okHttpClient)
+            .build()
+            .create(ApiService::class.java)
+    }
 
     @Provides
     @Singleton

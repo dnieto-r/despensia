@@ -27,5 +27,7 @@ class IngredientsBody(
     @Json(name = "intolerancias")
     val intolerancias: List<String>,
     @Json(name = "perfil")
-    val perfil: String //basico, intermedio, avanzado
+    val perfil: String, //basico, intermedio, avanzado
+    @Json(name = "comensales")
+    val comensales: String
 )

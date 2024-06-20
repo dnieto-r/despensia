@@ -15,12 +15,13 @@ class RepositoryImpl @Inject constructor(
         ApiState.Success(
             apiService.getRecipes(
                 IngredientsBody(
-                dificultad = "facil",
-                duracion = "30",
-                equipamiento = listOf("sarten"),
-                ingredientes = ingredients,
-                intolerancias = listOf("gluten"),
-                perfil = "intermedio"
+                    dificultad = "facil",
+                    duracion = "30",
+                    equipamiento = listOf("sarten"),
+                    ingredientes = ingredients,
+                    intolerancias = listOf("gluten"),
+                    perfil = "intermedio",
+                    comensales = "2"
             )
             ))
     } catch (e: Exception) {
