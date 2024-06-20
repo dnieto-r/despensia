@@ -49,12 +49,77 @@ def agregar_receta():
             mensaje = {'error': 'Faltan datos requeridos'}
             return jsonify(mensaje), 400
     prompt = 'Mi perfil como cocinero es el siguiente: la cocina es una pasión para mí. Me gusta utilizar técnicas avanzadas de cocina e innovar tanto en presentación como en fusión de ingredientes. Tengo los siguientes ingredientes en la nevera: salmón, peras, champiñones y espinacas. Tengo los siguientes utensilios de cocina disponibles: sartenes, ollas, horno, batidora, olla a presion, microhondas, freidora de aire, licuadora, soplete, mandolina, termometro, balanza. Estoy buscando una receta para 2 personas que me suponga un reto y que se pueda hacer en unos 90 minutos. Necesito que el formato de la respuesta venga en un json con el siguiente formato (el campo instrucciones puede estar dividido internamente en varios grupos por simplicidad si es necesario:{"titulo": "","descripcion": "","ingredientes": [],"utensilios": [],"instrucciones": ["paso_1": {"titulo": "","instrucciones": []},...]}'
-    receta = consultar_azure_openai(prompt)
-    return jsonify(receta), 201
+    #receta = consultar_azure_openai(prompt)
+    receta = {
+        "titulo": "Salmón con salsa de pera, champiñones salteados y espinacas crujientes",
+        "descripcion": "Una combinación innovadora que resalta los sabores del salmón con una salsa dulce de pera, acompañado de champiñones salteados y espinacas crujientes.",
+        "ingredientes": [
+            "Salmón fresco (2 filetes)",
+            "Peras (2 unidades)",
+            "Champiñones (200 g)",
+            "Espinacas frescas (150 g)",
+            "Aceite de oliva",
+            "Mantequilla",
+            "Ajo (2 dientes)",
+            "Caldo de verduras",
+            "Sal y pimienta al gusto"
+        ],
+        "procedimiento": [
+            {
+                "titulo": "Preparación de la salsa de pera",
+                "instrucciones": [
+                    "Pelar y cortar las peras en trozos. En una olla, derretir una cucharada de mantequilla y añadir los trozos de pera con un poco de sal.",
+                    "Cocinar a fuego medio-bajo hasta que las peras estén suaves, unos 10-15 minutos.",
+                    "Transferir las peras cocidas a una licuadora y triturar hasta obtener una salsa suave. Si es necesario, añadir un poco de caldo de verduras para ajustar la consistencia. Reservar."
+                ]
+            },
+            {
+                "titulo": "Preparación del salmón",
+                "instrucciones": [
+                    "Preparar los filetes de salmón secándolos con papel de cocina.",
+                    "Sazonar con sal y pimienta.",
+                    "En una sartén, calentar un poco de aceite de oliva a fuego medio-alto.",
+                    "Cocinar el salmón con la piel hacia abajo primero, durante 3-4 minutos. Luego, voltear y cocinar por otros 3-4 minutos hasta que esté cocido pero aún jugoso por dentro."
+                ]
+            },
+            {
+                "titulo": "Preparación de los champiñones salteados",
+                "instrucciones": [
+                    "Lavar y cortar los champiñones en láminas.",
+                    "En una sartén, calentar un poco de aceite de oliva y una cucharada de mantequilla.",
+                    "Añadir los champiñones y cocinar a fuego medio-alto hasta que estén dorados y tiernos, unos 5-7 minutos.",
+                    "Sazonar con sal y pimienta al gusto. Reservar."
+                ]
+            },
+            {
+                "titulo": "Preparación de las espinacas crujientes",
+                "instrucciones": [
+                    "Lavar y secar las espinacas.",
+                    "En una bandeja para horno, distribuir las espinacas en una capa uniforme.",
+                    "Rociar con un poco de aceite de oliva y sazonar con sal.",
+                    "Hornear a 180°C durante unos 5-7 minutos o hasta que las espinacas estén crujientes.",
+                    "Retirar del horno y reservar."
+                ]
+            },
+            {
+                "titulo": "Armado del plato",
+                "instrucciones": [
+                    "Colocar una cama de espinacas crujientes en el centro de cada plato.",
+                    "Colocar encima el filete de salmón cocido.",
+                    "Añadir los champiñones salteados alrededor del salmón.",
+                    "Salsear con la salsa de pera preparada.",
+                    "Decorar con algunas hojas frescas de espinacas o perejil si se desea.",
+                    "¡Servir caliente y disfrutar!"
+                ]
+            }
+        ]
+    }
+
+    return receta, 200
 
 @app.route('/recetas', methods=['GET'])
 def obtener_recetas():
     return jsonify(recetas)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8000, debug=True)
