@@ -3,6 +3,8 @@ import os
 import openai
 import requests
 import json
+import argparse
+
 
 app = Flask(__name__)
 
@@ -124,7 +126,7 @@ def generar_receta():
         imagen = imagen_mock
     else:
         receta_descripcion = receta["descripcion"]
-        prompt_imagen = f"Quiero una imagen de la receta {receta_descripcion} en un plato negro y con efecto realista."
+        prompt_imagen = f"Quiero una imagen de la receta {receta_descripcion} en un plato negro y con efecto realista y sin sombra."
         print(prompt_imagen)
         imagen = consultar_azure_openai(prompt_imagen, AZURE_ENDPOINT_IMAGES, AZURE_OPENAI_KEY_IMAGES, 'image')
     url_imagen = imagen['data'][0]['url']
@@ -192,4 +194,14 @@ def obtener_recetas_favoritas():
     return recetas_favoritas, 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    # Crear el analizador de argumentos
+    parser = argparse.ArgumentParser(description='Run the Flask app.')
+    # Añadir el argumento opcional 'port' con valor por defecto 8000
+    parser.add_argument('-p', '--port', type=int, default=8000, help='Port number to run the server on (default: 8000)')
+    # Parsear los argumentos
+    args = parser.parse_args()
+
+    # Obtener el valor del puerto
+    port = args.port
+    # Iniciar la aplicación Flask en el puerto especificado
+    app.run(host='0.0.0.0', port=port, debug=True)
