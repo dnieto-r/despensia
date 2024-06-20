@@ -58,7 +58,7 @@ POST /imagen en formato multipart. La imagen debe ir con la clave image
 
 curl de ejemplo:
 
-curl --location --request POST 'http://localhost:9000/imagen' --form 'image=@"/home/rps/Imágenes/ingredientes.jpg"'
+curl --request POST 'http://localhost:9000/imagen' --form 'image=@"/home/rps/Imágenes/ingredientes.jpg"'
 
 Respuesta:
 ```
