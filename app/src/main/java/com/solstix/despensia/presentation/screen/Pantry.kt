@@ -1,5 +1,10 @@
 package com.solstix.despensia.presentation.screen
 
+import android.Manifest
+import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
@@ -46,12 +51,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
+import com.solstix.despensia.GoogleAsr
+import com.solstix.despensia.MainActivity
+import com.solstix.despensia.MainListener
+import com.solstix.despensia.PermissionsManager
 import com.solstix.despensia.R
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -188,9 +198,35 @@ fun PantryScreen(
                         )
                     }
                 }
+                var asr: GoogleAsr? = null
+                asr = GoogleAsr(LocalContext.current, object : MainListener {
+                    override fun onResult(text: String?) {
+                        Log.d("JORGETESTO", "MainActivity onResult: $text")
+                        val ingredients = text?.split("y") ?: emptyList()
+                        ingredients.forEach {
+                            addIngredient.invoke(IngredientItem(it, 0))
+                        }
+                        asr?.stopAndDestroy()
+                    }
+                })
+                val context = LocalContext.current
+                val permission = Manifest.permission.RECORD_AUDIO
+                val requestPermissionLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.RequestPermission()
+                ) { isGranted ->
+                    PermissionsManager.checkPermission(
+                        context as MainActivity,
+                        isGranted,
+                        permission,
+                        acceptedAction = {
+                            initAsr(asr = asr)
+                            Log.d("JORGETESTO", "MainActivity permisssion accepted")
+                        }
+                    )
+                }
                 AnimatedVisibility(visible = expanded) {
                     IconButton(
-                        onClick = { /* Acción del icono */ },
+                        onClick = { requestPermission(requestPermissionLauncher) },
                         modifier = Modifier
                             .offset(y = iconOffset)
                             .alpha(iconAlpha)
@@ -279,3 +315,10 @@ fun PantryScreen(
     }
 }
 
+fun requestPermission(requestPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>) {
+    requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+}
+
+fun initAsr(asr: GoogleAsr) {
+    asr.startListening()
+}
