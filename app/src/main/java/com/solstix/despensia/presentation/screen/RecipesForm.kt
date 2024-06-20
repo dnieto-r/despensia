@@ -1,18 +1,25 @@
 package com.solstix.despensia.presentation.screen
 
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -28,6 +35,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -213,7 +224,10 @@ fun RecipesFormScreen(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 32.dp),
-            onClick = { viewModel.getProductDetails(ingredients) }) {
+            onClick = {
+                viewModel.getProductDetails(ingredients)
+            }
+        ) {
             Text(text = "Enviar")
         }
 
@@ -229,7 +243,8 @@ fun RecipesFormScreen(
                 )
             }
             is ApiState.Error -> {}
-            is ApiState.Loading -> {}
+            is ApiState.Loading -> { LoadingScreen() }
+            is ApiState.Empty -> {}
         }
     }
 }
@@ -244,5 +259,42 @@ fun RecipesDto.map(): List<Recipe> {
             ingredients = ingredients,
             steps = steps
         )
+    )
+}
+
+@Composable
+fun LoadingScreen() {
+    Column (
+        Modifier
+            .padding(top = 8.dp)
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressAnimated()
+    }
+}
+
+@Composable
+private fun CircularProgressAnimated(){
+    val progressValue = 0.85f
+    val infiniteTransition = rememberInfiniteTransition(label = "loadingAnimation")
+    val progressAnimationValue by infiniteTransition.animateFloat(
+        initialValue = 0.0f,
+        targetValue = progressValue,
+        animationSpec = infiniteRepeatable(animation = tween(1500)),
+        label = "loadingAnimation"
+    )
+
+    CircularProgressIndicator(
+        progress = {
+            progressAnimationValue
+        },
+        modifier = Modifier
+            .padding(1.dp)
+            .height(48.dp)
+            .width(48.dp),
+        color = Color.Blue,
+        strokeWidth = 5.dp,
     )
 }

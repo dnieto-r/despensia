@@ -12,16 +12,6 @@ import com.squareup.moshi.Moshi
 
 @Composable
 fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
-    val textito = viewModel.productDetailsState.value
 
-    when(textito) {
-        is ApiState.Success<RecipesDto> ->
-            RecipesListScreen(
-                navController = navController,
-                recipes = textito.data.map()
-            )
-        is ApiState.Error -> {}
-        is ApiState.Loading -> {}
-    }
 }
 
