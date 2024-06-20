@@ -6,8 +6,8 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class RecipesDto(
-//    @Json(name = "id")
-//    val id: Int,
+    @Json(name = "imagen")
+    val imagen: String,
     @Json(name = "dificultad")
     val difficulty: String,
     @Json(name = "duracion")

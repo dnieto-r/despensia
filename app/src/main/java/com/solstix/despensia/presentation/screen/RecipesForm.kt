@@ -267,7 +267,8 @@ fun RecipesDto.map(): List<Recipe> {
             duration = duration,
             difficulty = difficulty,
             ingredients = ingredients,
-            steps = steps
+            steps = steps,
+            imagen = imagen
         )
     )
 }
