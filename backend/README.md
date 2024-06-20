@@ -21,6 +21,8 @@ Y se recibe una respuesta:
 {
 	"titulo": "Título de la receta creada",
 	"descripcion": "Descripción de la receta creada",
+	"duracion": "17 minutos",
+	"dificultad": "baja/media/alta",
 	"ingredientes": [
 		"Ingrediente 01",
 		"Ingrediente 02",
