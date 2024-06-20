@@ -136,16 +136,16 @@ def generar_receta():
     receta["dificultad"] = datos_receta["dificultad"]
     receta["duracion"] = datos_receta["duracion"]
 
-    # titulo_receta = receta["titulo"]
-    # print(titulo_receta)
-    # try:
-    #     for r in recetas:
-    #         if r["titulo"] == titulo_receta:
-    #             return "Ya existe una receta con ese nombre", 400 
-    # except KeyError:
-    #     recetas.append(receta)
-    #     return receta, 200
-
+    titulo_receta = receta["titulo"]
+    print(titulo_receta)
+    try:
+        for r in recetas:
+            if r["titulo"] == titulo_receta:
+                return "Ya existe una receta con ese nombre", 400 
+    except KeyError:
+        pass
+    receta["favorita"] = False
+    recetas.append(receta)
     return receta, 200
 
 
