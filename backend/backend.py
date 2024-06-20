@@ -8,11 +8,6 @@ app = Flask(__name__)
 
 recetas = []
 
-# endpoint: https://sosltixlicenses.openai.azure.com/
-# Location/Region: eastus2
-# API Key: 48cf638f858f4118807d59f71c33b122
-# deployment: gpt-4o
-
 AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")  # Asegúrate de tener esta variable de entorno configurada
 AZURE_DOMAIN = "sosltixlicenses"
 AZURE_DEPLOYMENT = "gpt-4o"
