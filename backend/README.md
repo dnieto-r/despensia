@@ -1,6 +1,8 @@
 # Instrucciones para el Servidor Backend
 
-Este servidor atiende peticiones en su endpoint de /rectas.
+Hay dos servidores
+## backend.py: 
+Servidor que atiende peticiones en su endpoint de /recetas.
 
 Debe recibir la siguiente información:
 
@@ -49,6 +51,30 @@ Y se recibe una respuesta:
 }
 ```
 
+## imagerecognition.py: 
+Servidor que atiende peticiones en su endpoint /imagen
+
+POST /imagen en formato multipart. La imagen debe ir con la clave image
+
+curl de ejemplo:
+
+curl --location --request POST 'http://localhost:9000/imagen' --form 'image=@"/home/rps/Imágenes/ingredientes.jpg"'
+
+Respuesta:
+```
+{
+  "ingredientes": [
+    "espárragos",
+    "aguacate",
+    "cebolleta",
+    "tomate",
+    "huevo",
+    "jamón",
+    "pimienta",
+    "cáscara de huevo"
+  ]
+}
+```
 
 ## Instalación de Requisitos
 
