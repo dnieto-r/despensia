@@ -3,6 +3,9 @@ import os
 import openai
 import requests
 import json
+import argparse
+import base64
+from openai import AzureOpenAI
 
 app = Flask(__name__)
 
@@ -23,6 +26,34 @@ AZURE_DEPLOYMENT_IMAGES = "dall-e"
 AZURE_VERSION = "2024-02-01"
 AZURE_ENDPOINT = f"https://{AZURE_DOMAIN}.openai.azure.com/openai/deployments/{AZURE_DEPLOYMENT}/chat/completions?api-version={AZURE_VERSION}"
 AZURE_ENDPOINT_IMAGES = f"https://{AZURE_DOMAIN_IMAGES}.openai.azure.com/openai/deployments/{AZURE_DEPLOYMENT_IMAGES}/images/generations?api-version={AZURE_VERSION}"
+
+def image_azure_openai(base64_image):
+    client = AzureOpenAI(
+        api_key=AZURE_OPENAI_KEY,
+        azure_endpoint=AZURE_ENDPOINT,
+        api_version=AZURE_VERSION
+    )
+    response = client.chat.completions.create(
+        model=AZURE_DEPLOYMENT,
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": '¿Qué ingredientes hay en ésta imagen? Necesito que el formato de la respuesta venga en un json con el siguiente formato : {"ingredientes": ["tomate", "arroz"]}'
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{base64_image}"
+                        }
+                    }
+                ]
+            }
+        ]
+    )
+    return response.choices[0].message.content
 
 def consultar_azure_openai(prompt, endpoint, api_key, mode='text'):
     headers = {
@@ -89,6 +120,20 @@ def generate_prompt(ingredientes, equipamiento, perfil, comensales, dificultad, 
     
     return prompt
     
+@app.route('/imagen', methods=['POST'])
+def image_recognition():
+    if request.files.get("image") is None:
+        message = {'error': 'Missing image in multipart form data'}
+        return jsonify(message), 400
+    f = request.files["image"]
+    base64_image = base64.b64encode(f.read()).decode('utf-8')
+    message = image_azure_openai(base64_image)
+    response = app.response_class(
+        response= message.replace('```json\n', '').replace('```', ''),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
 
 @app.route('/generar', methods=['POST'])
 def generar_receta():
@@ -124,7 +169,7 @@ def generar_receta():
         imagen = imagen_mock
     else:
         receta_descripcion = receta["descripcion"]
-        prompt_imagen = f"Quiero una imagen de la receta {receta_descripcion} en un plato negro y con efecto realista."
+        prompt_imagen = f"Quiero una imagen de la receta {receta_descripcion} en un plato negro y con efecto realista y sin sombra."
         print(prompt_imagen)
         imagen = consultar_azure_openai(prompt_imagen, AZURE_ENDPOINT_IMAGES, AZURE_OPENAI_KEY_IMAGES, 'image')
     url_imagen = imagen['data'][0]['url']
@@ -142,7 +187,7 @@ def generar_receta():
     try:
         for r in recetas:
             if r["titulo"] == titulo_receta:
-                return "Ya existe una receta con ese nombre", 400 
+                return r, 200
     except KeyError:
         pass
     receta["favorita"] = False
@@ -192,4 +237,14 @@ def obtener_recetas_favoritas():
     return recetas_favoritas, 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    # Crear el analizador de argumentos
+    parser = argparse.ArgumentParser(description='Run the Flask app.')
+    # Añadir el argumento opcional 'port' con valor por defecto 8000
+    parser.add_argument('-p', '--port', type=int, default=8000, help='Port number to run the server on (default: 8000)')
+    # Parsear los argumentos
+    args = parser.parse_args()
+
+    # Obtener el valor del puerto
+    port = args.port
+    # Iniciar la aplicación Flask en el puerto especificado
+    app.run(host='0.0.0.0', port=port, debug=True)

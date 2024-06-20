@@ -32,9 +32,9 @@ android {
         val baseUrl = if (localPropertiesFile.exists()) {
             localProperties.load(localPropertiesFile.inputStream())
 
-            localProperties.getProperty("BASE_URL", "http://10.19.200.92:8000")
+            localProperties.getProperty("BASE_URL", "http://casapsm.duckdns.org:8015")
         } else {
-            "http://10.19.200.92:8000"
+            "http://casapsm.duckdns.org:8015"
         }
 
         /* TODO: Add base URL in local.properties file as:-
@@ -74,6 +74,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.14.0")
     implementation("io.coil-kt:coil-compose:2.2.2")
+    implementation("com.google.accompanist:accompanist-permissions:0.23.1")
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)

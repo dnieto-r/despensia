@@ -56,7 +56,7 @@ fun RecipesFormScreen(
     chefLevel: String
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val difficultyList = arrayOf("Baja", "Media", "Alta")
+    val difficultyList = arrayOf("Facil", "Media", "Dificil")
     var selectedDifficulty by remember { mutableStateOf(difficultyList[0]) }
     val isLactosa = remember { mutableStateOf(false) }
     val isMarisco = remember { mutableStateOf(false) }
@@ -226,7 +226,9 @@ fun RecipesFormScreen(
                     if (isLactosa.value) "lactosa" else "",
                     if (isMarisco.value) "marisco" else "",
                     if (isGluten.value) "gluten" else ""
-                )
+                ).filter {
+                    it != ""
+                }
 
                 viewModel.getProductDetails(
                     ingredients,

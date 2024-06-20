@@ -27,6 +27,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.solstix.despensia.presentation.screen.FavoriteScreen
+import com.solstix.despensia.presentation.screen.ImageSelectorScreen
 import com.solstix.despensia.presentation.screen.IngredientItem
 import com.solstix.despensia.presentation.screen.PantryScreen
 import com.solstix.despensia.presentation.screen.Recipe
@@ -88,6 +89,12 @@ fun App() {
                     ::setChefLevel,
                     utensils,
                     ::setUtensils,
+                )
+            }
+            composable("image_selector") {
+                ImageSelectorScreen(
+                    navController,
+                    viewModel
                 )
             }
             composable(

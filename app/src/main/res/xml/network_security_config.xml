@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">casapsm.duckdns.org</domain>
         <domain includeSubdomains="true">10.19.200.92</domain>
     </domain-config>
 </network-security-config>

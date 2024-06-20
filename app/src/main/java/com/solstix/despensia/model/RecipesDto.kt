@@ -22,6 +22,13 @@ data class RecipesDto(
     val steps: List<Pasos>
 )
 
+@JsonClass(generateAdapter = true)
+data class ImageDto(
+    @Json(name = "ingredientes")
+    val ingredientes: List<String>,
+)
+
+
 data class Pasos (
     @Json(name = "paso")
     val title: String,
