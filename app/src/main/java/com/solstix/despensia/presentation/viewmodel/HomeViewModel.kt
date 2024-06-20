@@ -21,13 +21,14 @@ class HomeViewModel @Inject constructor(
 
     // TODO: Set UI State
     private val _productDetailsState: MutableState<ApiState<RecipesDto>> =
-        mutableStateOf(ApiState.Loading)
+        mutableStateOf(ApiState.Empty)
     val productDetailsState: State<ApiState<RecipesDto>> get() = _productDetailsState
 
     fun getProductDetails(ingredients: List<IngredientItem>) {
         val ingredientsString = ingredients.map {
             it.name
         }
+        _productDetailsState.value = ApiState.Loading
         viewModelScope.launch(Dispatchers.IO) {
             _productDetailsState.value = repository.getRecipes(ingredientsString).also {
                 _productDetailsState.value = it
