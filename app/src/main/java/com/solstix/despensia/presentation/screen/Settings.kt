@@ -1,6 +1,5 @@
 package com.solstix.despensia.presentation.screen
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -49,7 +48,6 @@ fun SettingsScreen(
     val isBatidora = remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = Unit) {
-        Log.d("TESTING", "Utensils: $utensils")
         utensils.forEach {
             if (it.equals("horno")) {
                 isHorno.value = true
