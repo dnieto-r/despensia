@@ -14,6 +14,7 @@ POST al http://127.0.0.1:8000/recetas con el body:
   "duracion": "30 minutos",
   "intolerancias": ["Lactosa"]
 }
+```
 
 Y se recibe una respuesta:
 ```
@@ -44,6 +45,7 @@ Y se recibe una respuesta:
 		}
 	]
 }
+```
 
 
 ## Instalación de Requisitos
