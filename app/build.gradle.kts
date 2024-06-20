@@ -71,6 +71,7 @@ android {
 }
 
 dependencies {
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
