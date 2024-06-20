@@ -91,7 +91,10 @@ Antes de comenzar, asegúrate de tener Python 3 y pip instalados en tu sistema. 
     ```bash
     pip install -r requirements.txt
 
-3. Levantar el servidor:
+3. Levantar los servidores:
 
     ```bash
     python3 backend.py
+
+    ```bash
+    python3 imagerecognition.py
