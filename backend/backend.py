@@ -1,18 +1,10 @@
 from flask import Flask, request, jsonify
 import os
-import openai
 from openai import AzureOpenAI
-import requests
-import json
 
 app = Flask(__name__)
 
 recetas = []
-
-# endpoint: https://sosltixlicenses.openai.azure.com/
-# Location/Region: eastus2
-# API Key: 48cf638f858f4118807d59f71c33b122
-# deployment: gpt-4o
 
 AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")  # Asegúrate de tener esta variable de entorno configurada
 AZURE_DOMAIN = "sosltixlicenses"
@@ -44,7 +36,7 @@ def agregar_receta():
 
     for dato in datos_necesarios: 
         if dato not in datos_receta:
-            mensaje = {'error': 'Faltan datos requeridos, ' + dato}
+            mensaje = {'error': 'Faltan datos requeridos,'}
             return jsonify(mensaje), 400
     prompt = 'Mi perfil como cocinero es el siguiente: la cocina es una pasión para mí. Me gusta utilizar técnicas avanzadas de cocina e innovar tanto en presentación como en fusión de ingredientes. Tengo los siguientes ingredientes en la nevera: salmón, peras, champiñones y espinacas. Tengo los siguientes utensilios de cocina disponibles: sartenes, ollas, horno, batidora, olla a presion, microhondas, freidora de aire, licuadora, soplete, mandolina, termometro, balanza. Estoy buscando una receta para 2 personas que me suponga un reto y que se pueda hacer en unos 90 minutos. Necesito que el formato de la respuesta venga en un json con el siguiente formato (el campo instrucciones puede estar dividido internamente en varios grupos por simplicidad si es necesario:{"titulo": "","descripcion": "","ingredientes": [],"utensilios": [],"instrucciones": ["paso_1": {"titulo": "","instrucciones": []},...]}'
     receta = consultar_azure_openai(prompt)
@@ -60,4 +52,4 @@ def obtener_recetas():
     return jsonify(recetas)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8000, debug=True)
