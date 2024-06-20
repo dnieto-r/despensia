@@ -120,10 +120,7 @@ def generar_receta():
     print(prompt)
 
     receta = consultar_azure_openai(prompt)
-    
-    # loggeamos la receta generada
-    print(f'LOGGER: RESPUESTA IA:\n\n {receta}')
-    print(f'LOGGER: TIPO DE RESPUESTA IA:\n\n {type(receta)}')
+    receta = receta.replace("```json\n", "").replace("```", "")
 
     # convertimos a json
     try:
@@ -131,9 +128,23 @@ def generar_receta():
     except json.JSONDecodeError as e:
         receta = {"error decode json": "No se pudo generar la receta, esperabamos un json pero la puta IA no nos dio un json."}
     
+    # loggeamos la receta generada
+    print(f'LOGGER: RESPUESTA IA:\n\n {receta}')
+    print(f'LOGGER: TIPO DE RESPUESTA IA:\n\n {type(receta)}')
+
     # recordamos campos que vienen de la app
     receta["dificultad"] = datos_receta["dificultad"]
     receta["duracion"] = datos_receta["duracion"]
+
+    # titulo_receta = receta["titulo"]
+    # print(titulo_receta)
+    # try:
+    #     for r in recetas:
+    #         if r["titulo"] == titulo_receta:
+    #             return "Ya existe una receta con ese nombre", 400 
+    # except KeyError:
+    #     recetas.append(receta)
+    #     return receta, 200
 
     return receta, 200
 
