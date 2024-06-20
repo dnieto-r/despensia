@@ -96,5 +96,4 @@ Antes de comenzar, asegúrate de tener Python 3 y pip instalados en tu sistema. 
     ```bash
     python3 backend.py
 
-    ```bash
     python3 imagerecognition.py
