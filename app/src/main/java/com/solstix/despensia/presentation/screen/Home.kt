@@ -18,7 +18,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
                 navController = navController,
                 recipes = textito.data.map(),
                 onClick = {
-                    //RecipesDetailScreen(navController = navController, recipe = it)
+                    navController.navigate("recipes/$it")
                 }
             )
         is ApiState.Error -> {}

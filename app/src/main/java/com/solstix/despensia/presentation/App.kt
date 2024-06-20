@@ -19,13 +19,18 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.solstix.despensia.presentation.screen.FavoriteScreen
 import com.solstix.despensia.presentation.screen.PantryScreen
+import com.solstix.despensia.presentation.screen.Recipe
+import com.solstix.despensia.presentation.screen.RecipeDetailScreen
 import com.solstix.despensia.presentation.screen.SettingsScreen
 import com.solstix.despensia.presentation.viewmodel.HomeViewModel
+import com.squareup.moshi.Moshi
 
 @Composable
 fun App() {
@@ -48,6 +53,18 @@ fun App() {
                 SettingsScreen(
                     navController
                 )
+            }
+            composable(
+                "recipes/{recipe}"
+            ) { backStackEntry ->
+                val recipeObjectJson =  backStackEntry.arguments?.getString("recipe")
+                val moshi = Moshi.Builder().build()
+                val jsonAdapter = moshi.adapter(Recipe::class.java).lenient()
+                val recipeObject = recipeObjectJson?.let { jsonAdapter.fromJson(it) }
+
+                if (recipeObject != null) {
+                    RecipeDetailScreen(navController = navController, recipe = recipeObject)
+                }
             }
         }
         BottomNavigationBar(Modifier.height(50.dp), navController)
