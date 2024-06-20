@@ -1,4 +1,4 @@
-package com.movistarhome.despensia.ui.theme
+package com.solstix.despensia.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

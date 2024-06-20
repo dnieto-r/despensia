@@ -1,4 +1,4 @@
-package com.movistarhome.despensia
+package com.solstix.despensia
 
 import org.junit.Test
 
