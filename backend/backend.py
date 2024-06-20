@@ -6,8 +6,12 @@ import json
 import argparse
 import base64
 from openai import AzureOpenAI
+import logging
 
 app = Flask(__name__)
+
+# Configuración de logging
+logging.basicConfig(level=logging.INFO)
 
 recetas = []
 datos_ultima_receta = None
@@ -171,6 +175,7 @@ def generar_receta():
     if datos_ultima_receta is not None:
         if comparar_diccionarios(datos_receta, datos_ultima_receta):
             print(f"\nLOGGER: RECETA REPETIDA")
+            logging.info("LOGGER: RECETA REPETIDA")
             receta_repetida = True
     else:
         receta_repetida = False
@@ -179,6 +184,7 @@ def generar_receta():
     
     # log para imprimir el prompt enviado
     print(f"\nLOGGER: Prompt:\n\n {prompt}")
+    logging.info(f"LOGGER: Prompt: {prompt}")
 
     if mock_receta:
         receta = receta_mock
@@ -191,6 +197,7 @@ def generar_receta():
         except json.JSONDecodeError as e:
             receta = {"error decode json": "No se pudo generar la receta, esperabamos un json pero la puta IA no nos dio un json."}
         print(f'\nLOGGER: RESPUESTA IA ({type(receta)}):\n\n {receta}')
+        logging.info(f"LOGGER: RESPUESTA IA ({type(receta)}): {receta}")
 
     # Generamos la imagen del plato
     if mock_imagen:
@@ -199,6 +206,7 @@ def generar_receta():
         receta_descripcion = receta["descripcion"]
         prompt_imagen = f"Quiero una imagen de la receta {receta_descripcion} en un plato negro y con efecto realista y sin sombra."
         print(f"\nLOGGER: Prompt imagen:\n\n {prompt_imagen}")
+        logging.info(f"LOGGER: Prompt imagen: {prompt_imagen}")
         imagen = consultar_azure_openai(prompt_imagen, AZURE_ENDPOINT_IMAGES, AZURE_OPENAI_KEY_IMAGES, 'image')
     url_imagen = imagen['data'][0]['url']
     
@@ -209,6 +217,8 @@ def generar_receta():
     titulo_receta = receta["titulo"]
     print(f"\nLOGGER: Receta generada: {titulo_receta}")
     print(f"\nLOGGER: Imagen generada: {url_imagen}")
+    logging.info(f"LOGGER: Receta generada: {titulo_receta}")
+    logging.info(f"LOGGER: Imagen generada: {url_imagen}")
     try:
         for r in recetas:
             if r["titulo"] == titulo_receta:
