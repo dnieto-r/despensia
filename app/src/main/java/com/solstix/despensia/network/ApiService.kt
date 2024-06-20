@@ -25,7 +25,7 @@ interface ApiService {
 
 @JsonClass(generateAdapter = true)
 class IngredientsBody(
-    @Json(name = "dificultad") //baja, media, alta
+    @Json(name = "dificultad") //facil, media, dificil
     val dificultad: String,
     @Json(name = "duracion")
     val duracion: String,
