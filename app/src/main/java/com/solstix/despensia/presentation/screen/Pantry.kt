@@ -1,5 +1,6 @@
 package com.solstix.despensia.presentation.screen
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
@@ -48,19 +49,27 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.solstix.despensia.R
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 data class IngredientItem(val name: String, val icon: Int, val isChecked: Boolean = false)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantryScreen(navController: NavController) {
+fun PantryScreen(
+    storedItemList: MutableList<IngredientItem>,
+    addIngredient: (IngredientItem) -> Unit,
+    removeIngredient: (IngredientItem) -> Unit,
+    navController: NavController
+) {
     var text by remember { mutableStateOf("") }
-    val itemList = remember { mutableStateListOf<IngredientItem>() }
     var expanded by remember { mutableStateOf(false) }
     var isTextSelected by remember { mutableStateOf(false) }
     val transition = updateTransition(targetState = expanded, label = "expandableTransition")
@@ -80,7 +89,7 @@ fun PantryScreen(navController: NavController) {
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Ingredientes actuales:") }) },
+        topBar = { TopAppBar(title = { Text("Ingredientes disponibles:", fontWeight = FontWeight.Bold) }) },
     ) {
         ConstraintLayout(
             modifier = Modifier
@@ -101,13 +110,13 @@ fun PantryScreen(navController: NavController) {
                     },
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                items(itemList.size) {
-                    val checkedState = remember { mutableStateOf(itemList[it].isChecked) }
+                items(storedItemList.size) {
+                    val checkedState = remember { mutableStateOf(storedItemList[it].isChecked) }
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Image(
                             painter = painterResource(id = R.drawable.apple),
-                            contentDescription = itemList[it].name,
+                            contentDescription = storedItemList[it].name,
                             modifier = Modifier
                                 .height(30.dp)
                                 .padding(end = 10.dp)
@@ -120,12 +129,12 @@ fun PantryScreen(navController: NavController) {
                         ) {
                             Text(
                                 modifier = Modifier.padding(10.dp),
-                                text = itemList[it].name
+                                text = storedItemList[it].name
                             )
                         }
                         Box(
                             modifier = Modifier.width(40.dp).padding(start = 7.dp).clickable {
-                                itemList.remove(itemList[it])
+                                removeIngredient.invoke(storedItemList[it])
                             }
                         ) {
                             Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red)
@@ -136,7 +145,12 @@ fun PantryScreen(navController: NavController) {
 
             FloatingActionButton(
                 onClick = {
+                    val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+                    val listType = Types.newParameterizedType(List::class.java, IngredientItem::class.java)
+                    val jsonAdapter = moshi.adapter<List<IngredientItem>>(listType).lenient()
 
+                    val recipeJson = jsonAdapter.toJson(storedItemList)
+                    navController.navigate("recipes_form/$recipeJson")
                 },
                 shape = CircleShape,
                 modifier = Modifier
@@ -241,7 +255,7 @@ fun PantryScreen(navController: NavController) {
                         onClick = {
                             if (isTextSelected) {
                                 if (text.isNotBlank()) {
-                                    itemList.add(IngredientItem(text, 0))
+                                    addIngredient.invoke(IngredientItem(text, 0))
                                     text = ""
                                 }
                             } else {

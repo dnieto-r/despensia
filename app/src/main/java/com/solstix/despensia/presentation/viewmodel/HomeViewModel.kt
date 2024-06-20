@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.solstix.despensia.model.RecipesDto
+import com.solstix.despensia.presentation.screen.IngredientItem
 import com.solstix.despensia.repository.Repository
 import com.solstix.despensia.util.ApiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,13 +24,12 @@ class HomeViewModel @Inject constructor(
         mutableStateOf(ApiState.Loading)
     val productDetailsState: State<ApiState<RecipesDto>> get() = _productDetailsState
 
-    init {
-        getProductDetails()
-    }
-
-    private fun getProductDetails() {
+    fun getProductDetails(ingredients: List<IngredientItem>) {
+        val ingredientsString = ingredients.map {
+            it.name
+        }
         viewModelScope.launch(Dispatchers.IO) {
-            _productDetailsState.value = repository.getRecipes(listOf("huevos")).also {
+            _productDetailsState.value = repository.getRecipes(ingredientsString).also {
                 _productDetailsState.value = it
             }
         }
