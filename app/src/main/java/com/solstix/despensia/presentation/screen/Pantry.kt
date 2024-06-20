@@ -55,6 +55,9 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.solstix.despensia.R
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 data class IngredientItem(val name: String, val icon: Int, val isChecked: Boolean = false)
 
@@ -142,7 +145,12 @@ fun PantryScreen(
 
             FloatingActionButton(
                 onClick = {
+                    val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+                    val listType = Types.newParameterizedType(List::class.java, IngredientItem::class.java)
+                    val jsonAdapter = moshi.adapter<List<IngredientItem>>(listType).lenient()
 
+                    val recipeJson = jsonAdapter.toJson(storedItemList)
+                    navController.navigate("recipes_form/$recipeJson")
                 },
                 shape = CircleShape,
                 modifier = Modifier
