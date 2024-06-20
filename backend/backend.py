@@ -34,10 +34,19 @@ def consultar_azure_openai(prompt):
         raise Exception(f"Error en la solicitud a Azure OpenAI: {response.status_code}, {response.text}")
 
 
+def generate_prompt(ingredients, equipment, profile, difficulty, duration, intolerances):
+    perfil = {
+        "basico": "tengo poca experiencia. Sé cortar y pelar ingredientes básicos de la cocina mediterránea. Normalmente hago recetas hirviendo o pasando por la plancha los ingredientes. El equipo con el que suelo trabajar son ollas, sartenes y cuchillos.",
+        "intermedio": "cocino habitualmente todos los días. Controlo los puntos de cocción de carnes y pescados. Uso equipamiento de cocina más allá de ollas, cuchillos y sartenes, como por ejemplo, batidoras, pasapures, horno y cocción al vapor.",
+        "avanzado": "la cocina es una pasión para mí. Me gusta utilizar técnicas avanzadas de cocina e innovar tanto en presentación como en fusión de ingredientes."
+    }
+    perfil = "Mi perfil como cocinero es el siguiente: " + perfil[profile] 
+    
+
 @app.route('/recetas', methods=['POST'])
 def agregar_receta():
     datos_receta = request.get_json()
-    datos_necesarios = ["ingredientes", "equipamiento", "tipo", "dificultad", "duracion", "intolerancias"]
+    datos_necesarios = ["ingredientes", "equipamiento", "perfil", "dificultad", "duracion", "intolerancias"]
 
     for dato in datos_necesarios: 
         if dato not in datos_receta:
@@ -63,7 +72,7 @@ def agregar_receta():
         ],
         "procedimiento": [
             {
-                "titulo": "Preparación de la salsa de pera",
+                "paso": "Preparación de la salsa de pera",
                 "instrucciones": [
                     "Pelar y cortar las peras en trozos. En una olla, derretir una cucharada de mantequilla y añadir los trozos de pera con un poco de sal.",
                     "Cocinar a fuego medio-bajo hasta que las peras estén suaves, unos 10-15 minutos.",
@@ -71,7 +80,7 @@ def agregar_receta():
                 ]
             },
             {
-                "titulo": "Preparación del salmón",
+                "paso": "Preparación del salmón",
                 "instrucciones": [
                     "Preparar los filetes de salmón secándolos con papel de cocina.",
                     "Sazonar con sal y pimienta.",
@@ -80,7 +89,7 @@ def agregar_receta():
                 ]
             },
             {
-                "titulo": "Preparación de los champiñones salteados",
+                "paso": "Preparación de los champiñones salteados",
                 "instrucciones": [
                     "Lavar y cortar los champiñones en láminas.",
                     "En una sartén, calentar un poco de aceite de oliva y una cucharada de mantequilla.",
@@ -89,7 +98,7 @@ def agregar_receta():
                 ]
             },
             {
-                "titulo": "Preparación de las espinacas crujientes",
+                "paso": "Preparación de las espinacas crujientes",
                 "instrucciones": [
                     "Lavar y secar las espinacas.",
                     "En una bandeja para horno, distribuir las espinacas en una capa uniforme.",
@@ -99,7 +108,7 @@ def agregar_receta():
                 ]
             },
             {
-                "titulo": "Armado del plato",
+                "paso": "Armado del plato",
                 "instrucciones": [
                     "Colocar una cama de espinacas crujientes en el centro de cada plato.",
                     "Colocar encima el filete de salmón cocido.",
