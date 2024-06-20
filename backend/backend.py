@@ -137,7 +137,7 @@ def generate_prompt(ingredientes, equipamiento, perfil, comensales, dificultad, 
     
     # Si le pedimos varias veces recetas con la misma entrada, damos un prompt diferentes para tratar de conseguir una receta diferente
     if receta_repetida:
-        prompt = f"Anteriormente te he pedido este prompt: " + prompt + " Por favor, dame una receta diferente que no tenga como título {datos_ultima_receta['titulo']}."
+        prompt = f"Anteriormente te he pedido este prompt: " + prompt + f" Por favor, dame una receta diferente que no tenga como título {datos_ultima_receta['titulo']}."
 
     return prompt
     
