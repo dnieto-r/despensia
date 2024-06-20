@@ -82,12 +82,19 @@ def generar_receta():
             mensaje = {'error': 'Faltan datos requeridos'}
             return jsonify(mensaje), 400
         
+    assert datos_receta["perfil"] in ["basico", "intermedio", "avanzado"], "El perfil del cocinero debe ser 'basico', 'intermedio' o 'avanzado'"
+    assert datos_receta["dificultad"] in ["facil", "media", "dificil"], "La dificultad de la receta debe ser 'facil', 'media' o 'dificil'"
+
     prompt = generate_prompt(datos_receta["ingredientes"], datos_receta["equipamiento"], datos_receta["perfil"], datos_receta["comensales"], datos_receta["dificultad"], datos_receta["duracion"], datos_receta["intolerancias"])
     
     # log para imprimir el prompt enviado
     print(prompt)
 
     receta = consultar_azure_openai(prompt)
+    
+    # loggeamos la receta generada
+    print(f'LOGGER: RESPUESTA IA:\n\n {receta}')
+    print(f'LOGGER: TIPO DE RESPUESTA IA:\n\n {type(receta)}')
 
     # convertimos a json
     try:
@@ -99,9 +106,6 @@ def generar_receta():
     receta["dificultad"] = datos_receta["dificultad"]
     receta["duracion"] = datos_receta["duracion"]
 
-    # loggeamos la receta generada
-    print(receta)
-    print(type(receta))
     
     # receta = {
     #     "dificultad": datos_receta["dificultad"],
