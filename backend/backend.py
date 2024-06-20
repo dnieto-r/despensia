@@ -10,6 +10,7 @@ from openai import AzureOpenAI
 app = Flask(__name__)
 
 recetas = []
+datos_ultima_receta = None
 
 mock_receta = False
 mock_imagen = False
@@ -83,7 +84,19 @@ def consultar_azure_openai(prompt, endpoint, api_key, mode='text'):
     else:
         raise Exception(f"Error en la solicitud a Azure OpenAI: {response.status_code}, {response.text}")
 
-def generate_prompt(ingredientes, equipamiento, perfil, comensales, dificultad, duracion, intolerancias):
+def comparar_diccionarios(d1, d2):
+    if d1.keys() != d2.keys():
+        return False
+    for key in d1:
+        if isinstance(d1[key], list) and isinstance(d2[key], list):
+            if sorted(d1[key]) != sorted(d2[key]):  # Comparar listas sin importar el orden
+                return False
+        else:
+            if d1[key] != d2[key]:
+                return False
+    return True
+
+def generate_prompt(ingredientes, equipamiento, perfil, comensales, dificultad, duracion, intolerancias, receta_repetida=False):
     # perfil de cocinero
     perfiles = {
         "basico": "Mi perfil como cocinero es el siguiente: tengo poca experiencia. Sé cortar y pelar ingredientes comunes. Normalmente hago recetas hirviendo o pasando por la plancha los ingredientes. El equipo con el que suelo trabajar son ollas, sartenes y cuchillos.",
@@ -118,6 +131,10 @@ def generate_prompt(ingredientes, equipamiento, perfil, comensales, dificultad, 
 
     prompt = perfil_elegido + ' ' + equipamiento + ' ' + ingredientes + ' ' + propiedades_receta + ' ' + formato
     
+    # Si le pedimos varias veces recetas con la misma entrada, damos un prompt diferentes para tratar de conseguir una receta diferente
+    if receta_repetida:
+        prompt = f"Anteriormente te he pedido este prompt: " + prompt + " Por favor, dame una receta diferente que no tenga como título {datos_ultima_receta['titulo']}."
+
     return prompt
     
 @app.route('/imagen', methods=['POST'])
@@ -133,25 +150,35 @@ def image_recognition():
         status=200,
         mimetype='application/json'
     )
-    return response
+    return response   
 
 @app.route('/generar', methods=['POST'])
 def generar_receta():
+    global datos_ultima_receta
     datos_receta = request.get_json()
     datos_necesarios = ["ingredientes", "equipamiento", "perfil", "comensales", "dificultad", "duracion", "intolerancias"]
 
     for dato in datos_necesarios: 
         if dato not in datos_receta:
-            mensaje = {'error': 'Faltan datos requeridos'}
+            mensaje = {'error': 'Falta el dato "{dato}" requerido en la consulta de genearación de recetas.'}
             return jsonify(mensaje), 400
         
     assert datos_receta["perfil"] in ["basico", "intermedio", "avanzado"], "El perfil del cocinero debe ser 'basico', 'intermedio' o 'avanzado'"
     assert datos_receta["dificultad"] in ["facil", "media", "dificil"], "La dificultad de la receta debe ser 'facil', 'media' o 'dificil'"
-
-    prompt = generate_prompt(datos_receta["ingredientes"], datos_receta["equipamiento"], datos_receta["perfil"], datos_receta["comensales"], datos_receta["dificultad"], datos_receta["duracion"], datos_receta["intolerancias"])
+    
+    # Compruebo si la receta que se está pidiendo es exactamente igual a la última generada
+    receta_repetida = False
+    if datos_ultima_receta is not None:
+        if comparar_diccionarios(datos_receta, datos_ultima_receta):
+            print(f"\nLOGGER: RECETA REPETIDA")
+            receta_repetida = True
+    else:
+        receta_repetida = False
+    
+    prompt = generate_prompt(datos_receta["ingredientes"], datos_receta["equipamiento"], datos_receta["perfil"], datos_receta["comensales"], datos_receta["dificultad"], datos_receta["duracion"], datos_receta["intolerancias"], receta_repetida)
     
     # log para imprimir el prompt enviado
-    print(prompt)
+    print(f"\nLOGGER: Prompt:\n\n {prompt}")
 
     if mock_receta:
         receta = receta_mock
@@ -163,27 +190,25 @@ def generar_receta():
             receta = json.loads(receta)
         except json.JSONDecodeError as e:
             receta = {"error decode json": "No se pudo generar la receta, esperabamos un json pero la puta IA no nos dio un json."}
-        
+        print(f'\nLOGGER: RESPUESTA IA ({type(receta)}):\n\n {receta}')
+
     # Generamos la imagen del plato
     if mock_imagen:
         imagen = imagen_mock
     else:
         receta_descripcion = receta["descripcion"]
         prompt_imagen = f"Quiero una imagen de la receta {receta_descripcion} en un plato negro y con efecto realista y sin sombra."
-        print(prompt_imagen)
+        print(f"\nLOGGER: Prompt imagen:\n\n {prompt_imagen}")
         imagen = consultar_azure_openai(prompt_imagen, AZURE_ENDPOINT_IMAGES, AZURE_OPENAI_KEY_IMAGES, 'image')
     url_imagen = imagen['data'][0]['url']
     
-    # loggeamos la receta generada
-    print(f'LOGGER: RESPUESTA IA:\n\n {receta}')
-    print(f'LOGGER: TIPO DE RESPUESTA IA:\n\n {type(receta)}')
-
     # recordamos campos que vienen de la app
     receta["dificultad"] = datos_receta["dificultad"]
     receta["duracion"] = datos_receta["duracion"]
 
     titulo_receta = receta["titulo"]
-    print(titulo_receta)
+    print(f"\nLOGGER: Receta generada: {titulo_receta}")
+    print(f"\nLOGGER: Imagen generada: {url_imagen}")
     try:
         for r in recetas:
             if r["titulo"] == titulo_receta:
@@ -193,6 +218,7 @@ def generar_receta():
     receta["favorita"] = False
     receta["imagen"] = url_imagen
     recetas.append(receta)
+    datos_ultima_receta = datos_receta
     return receta, 200
 
 
