@@ -15,6 +15,7 @@ logging.basicConfig(level=logging.INFO)
 
 recetas = []
 datos_ultima_receta = None
+titulo_ultima_receta = None
 
 mock_receta = False
 mock_imagen = False
@@ -137,7 +138,7 @@ def generate_prompt(ingredientes, equipamiento, perfil, comensales, dificultad, 
     
     # Si le pedimos varias veces recetas con la misma entrada, damos un prompt diferentes para tratar de conseguir una receta diferente
     if receta_repetida:
-        prompt = f"Anteriormente te he pedido este prompt: " + prompt + f" Por favor, dame una receta diferente que no tenga como título {datos_ultima_receta['titulo']}."
+        prompt = f"Anteriormente te he pedido este prompt: " + prompt + f" Por favor, dame una receta diferente que no tenga como título {titulo_ultima_receta}."
 
     return prompt
     
@@ -159,6 +160,7 @@ def image_recognition():
 @app.route('/generar', methods=['POST'])
 def generar_receta():
     global datos_ultima_receta
+    global titulo_ultima_receta
     datos_receta = request.get_json()
     datos_necesarios = ["ingredientes", "equipamiento", "perfil", "comensales", "dificultad", "duracion", "intolerancias"]
 
@@ -228,7 +230,9 @@ def generar_receta():
     receta["favorita"] = False
     receta["imagen"] = url_imagen
     recetas.append(receta)
+    # Guardo los datos y el nombre de la última receta generada, por si vuelven a pedirme lo mismo no repetir recetas
     datos_ultima_receta = datos_receta
+    titulo_ultima_receta = titulo_receta
     return receta, 200
 
 
