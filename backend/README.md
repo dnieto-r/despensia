@@ -5,7 +5,7 @@ Este servidor atiende peticiones en su endpoint de /rectas.
 Debe recibir la siguiente información:
 
 POST al http://127.0.0.1:8000/recetas con el body:
-```json
+```
 {
   "ingredientes": ["salmon", "pimienta", "sal"],
   "equipamiento": ["olla grande", "colador"],
@@ -16,7 +16,7 @@ POST al http://127.0.0.1:8000/recetas con el body:
 }
 
 Y se recibe una respuesta:
-```json
+```
 {
 	"titulo": "Título de la receta creada",
 	"descripcion": "Descripción de la receta creada",
