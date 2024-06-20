@@ -187,7 +187,7 @@ def generar_receta():
     try:
         for r in recetas:
             if r["titulo"] == titulo_receta:
-                return "Ya existe una receta con ese nombre", 400 
+                return r, 200
     except KeyError:
         pass
     receta["favorita"] = False
