@@ -13,8 +13,11 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -42,6 +45,19 @@ fun App() {
     val viewModel = hiltViewModel<HomeViewModel>()
     val itemList = remember { mutableStateListOf<IngredientItem>() }
 
+
+    var chefLevel by remember { mutableStateOf("Básico") }
+    val utensils = remember { mutableStateListOf<String>() }
+
+    fun setChefLevel(value: String) {
+        chefLevel = value
+    }
+
+    fun setUtensils(value: List<String>) {
+        utensils.clear()
+        utensils.addAll(value)
+    }
+
     fun addIngredient(item: IngredientItem) {
         itemList.add(item)
     }
@@ -67,7 +83,11 @@ fun App() {
             }
             composable(BottomNavItem.Settings.route) {
                 SettingsScreen(
-                    navController
+                    navController,
+                    chefLevel,
+                    ::setChefLevel,
+                    utensils,
+                    ::setUtensils,
                 )
             }
             composable(
