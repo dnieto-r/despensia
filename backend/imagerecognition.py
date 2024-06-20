@@ -50,7 +50,7 @@ def image_azure_openai(base64_image):
 @app.route('/imagen', methods=['POST'])
 def image_recognition():
     if request.files.get("image") is None:
-        message = {'error': 'Faltan imagen en multipart'}
+        message = {'error': 'Missing image in multipart form data'}
         return jsonify(message), 400
     f = request.files["image"]
     base64_image = base64.b64encode(f.read()).decode('utf-8')
