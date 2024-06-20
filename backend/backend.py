@@ -51,6 +51,8 @@ def agregar_receta():
     prompt = 'Mi perfil como cocinero es el siguiente: la cocina es una pasión para mí. Me gusta utilizar técnicas avanzadas de cocina e innovar tanto en presentación como en fusión de ingredientes. Tengo los siguientes ingredientes en la nevera: salmón, peras, champiñones y espinacas. Tengo los siguientes utensilios de cocina disponibles: sartenes, ollas, horno, batidora, olla a presion, microhondas, freidora de aire, licuadora, soplete, mandolina, termometro, balanza. Estoy buscando una receta para 2 personas que me suponga un reto y que se pueda hacer en unos 90 minutos. Necesito que el formato de la respuesta venga en un json con el siguiente formato (el campo instrucciones puede estar dividido internamente en varios grupos por simplicidad si es necesario:{"titulo": "","descripcion": "","ingredientes": [],"utensilios": [],"instrucciones": ["paso_1": {"titulo": "","instrucciones": []},...]}'
     #receta = consultar_azure_openai(prompt)
     receta = {
+        "dificultad": "media",
+        "duracion": "17 minutos",
         "titulo": "Salmón con salsa de pera, champiñones salteados y espinacas crujientes",
         "descripcion": "Una combinación innovadora que resalta los sabores del salmón con una salsa dulce de pera, acompañado de champiñones salteados y espinacas crujientes.",
         "ingredientes": [
