@@ -8,7 +8,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface ApiService {
-    @POST("recetas") // TODO: Set API Endpoint
+    @POST("generar") // TODO: Set API Endpoint
     suspend fun getRecipes(
         @Body ingredients: IngredientsBody
     ): RecipesDto // TODO: Set API Response
