@@ -52,7 +52,7 @@ Y se recibe una respuesta:
 ```
 
 ## imagerecognition.py: 
-Servidor que atiende peticiones en su endpoint /imagen
+Servidor que permite el reconiocimiento de los ingredientes en una imagen. Atiende peticiones en su endpoint /imagen
 
 POST /imagen en formato multipart. La imagen debe ir con la clave image
 
