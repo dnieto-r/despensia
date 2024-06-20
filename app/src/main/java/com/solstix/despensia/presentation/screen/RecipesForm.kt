@@ -40,11 +40,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.solstix.despensia.model.RecipesDto
+import com.solstix.despensia.presentation.BottomNavItem
 import com.solstix.despensia.presentation.viewmodel.HomeViewModel
 import com.solstix.despensia.util.ApiState
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +51,8 @@ fun RecipesFormScreen(
     ingredients: List<IngredientItem>,
     viewModel: HomeViewModel,
     utensils: List<String>,
-    chefLevel: String
+    chefLevel: String,
+    setRecipes: (List<Recipe>) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     val difficultyList = arrayOf("Facil", "Media", "Dificil")
@@ -216,43 +215,45 @@ fun RecipesFormScreen(
                 modifier = Modifier.padding(start = 16.dp)
             )
         }
-
-        Button(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 32.dp),
-            onClick = {
-                val intolerances = listOf(
-                    if (isLactosa.value) "lactosa" else "",
-                    if (isMarisco.value) "marisco" else "",
-                    if (isGluten.value) "gluten" else ""
-                ).filter {
-                    it != ""
-                }
-
-                viewModel.getProductDetails(
-                    ingredients,
-                    selectedDifficulty,
-                    intolerances,
-                    utensils,
-                    chefLevel,
-                    duration,
-                    people)
-            }
-        ) {
-            Text(text = "Enviar")
-        }
-
         val recipes = viewModel.productDetailsState.value
+
+        if (recipes != ApiState.Loading) {
+            Button(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 32.dp),
+                onClick = {
+                    val intolerances = listOf(
+                        if (isLactosa.value) "lactosa" else "",
+                        if (isMarisco.value) "marisco" else "",
+                        if (isGluten.value) "gluten" else ""
+                    ).filter {
+                        it != ""
+                    }
+
+                    viewModel.getProductDetails(
+                        ingredients,
+                        selectedDifficulty,
+                        intolerances,
+                        utensils,
+                        chefLevel,
+                        duration,
+                        people
+                    )
+                }
+            ) {
+                Text(text = "Enviar")
+            }
+        }
 
         when(recipes) {
             is ApiState.Success<RecipesDto> -> {
-                val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-                val listType = Types.newParameterizedType(List::class.java, Recipe::class.java)
-                val jsonAdapter = moshi.adapter<List<Recipe>>(listType).lenient()
-                val recipesJson = jsonAdapter.toJson(recipes.data.map())
-                    navController.navigate("recipesList/$recipesJson"
-                )
+                setRecipes.invoke(recipes.data.map())
+                navController.navigate("recipesList") {
+                    popUpTo(BottomNavItem.Pantry.route) {
+                        inclusive = false
+                    }
+                }
             }
             is ApiState.Error -> {}
             is ApiState.Loading -> { LoadingScreen() }

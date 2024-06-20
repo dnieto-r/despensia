@@ -26,7 +26,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.solstix.despensia.presentation.screen.FavoriteScreen
 import com.solstix.despensia.presentation.screen.ImageSelectorScreen
 import com.solstix.despensia.presentation.screen.IngredientItem
 import com.solstix.despensia.presentation.screen.PantryScreen
@@ -46,9 +45,20 @@ fun App() {
     val viewModel = hiltViewModel<HomeViewModel>()
     val itemList = remember { mutableStateListOf<IngredientItem>() }
 
+    var recipes: List<Recipe> = remember { emptyList() }
+    var favoriteRecipes: MutableList<Recipe> = remember { mutableListOf() }
+    var selectedRecipe: Recipe? = remember { null }
 
     var chefLevel by remember { mutableStateOf("Basico") }
-    val utensils = remember { mutableStateListOf<String>("horno", "batidora", "sarten", "olla express", "microondas") }
+    val utensils = remember {
+        mutableStateListOf<String>(
+            "horno",
+            "batidora",
+            "sarten",
+            "olla express",
+            "microondas"
+        )
+    }
 
     fun setChefLevel(value: String) {
         chefLevel = value
@@ -67,8 +77,12 @@ fun App() {
         itemList.remove(item)
     }
 
-    Column (Modifier.fillMaxSize()) {
-        NavHost(navController = navController, startDestination = BottomNavItem.Pantry.route, modifier = Modifier.weight(1f)) {
+    Column(Modifier.fillMaxSize()) {
+        NavHost(
+            navController = navController,
+            startDestination = BottomNavItem.Pantry.route,
+            modifier = Modifier.weight(1f)
+        ) {
             composable(BottomNavItem.Pantry.route) {
                 PantryScreen(
                     itemList,
@@ -78,9 +92,13 @@ fun App() {
                 )
             }
             composable(BottomNavItem.Favorites.route) {
-                FavoriteScreen(
-                    navController
-                )
+                RecipesListScreen(
+                    navController = navController,
+                    recipes = favoriteRecipes,
+                    favorites = favoriteRecipes,
+                    addFavorite = { favoriteRecipes.add(it) },
+                    clearRecipes = { recipes = emptyList() },
+                    selectRecipe = { selectedRecipe = it })
             }
             composable(BottomNavItem.Settings.route) {
                 SettingsScreen(
@@ -98,28 +116,30 @@ fun App() {
                 )
             }
             composable(
-                "recipesList/{listRecipes}"
+                "recipesList"
             ) {
-                val listRecipesJson = it.arguments?.getString("listRecipes")
-                val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-                val listType = Types.newParameterizedType(List::class.java, Recipe::class.java)
-                val jsonAdapter = moshi.adapter<List<Recipe>>(listType).lenient()
-                val listRecipes = listRecipesJson?.let { jsonAdapter.fromJson(it) }
-
-                if (listRecipes != null) {
-                    RecipesListScreen(navController = navController, recipes = listRecipes)
-                }
+                RecipesListScreen(
+                    navController = navController,
+                    recipes = recipes,
+                    favorites = favoriteRecipes,
+                    addFavorite = {
+                        if (!favoriteRecipes.contains(it))
+                            favoriteRecipes.add(it)
+                        else {
+                            favoriteRecipes.remove(it)
+                        }
+                    },
+                    clearRecipes = { recipes = emptyList() },
+                    selectRecipe = { selectedRecipe = it })
             }
             composable(
-                "recipes/{recipe}"
+                "recipes"
             ) { backStackEntry ->
-                val recipeObjectJson =  backStackEntry.arguments?.getString("recipe")
-                val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-                val jsonAdapter = moshi.adapter(Recipe::class.java).lenient()
-                val recipeObject = recipeObjectJson?.let { jsonAdapter.fromJson(it) }
-
-                if (recipeObject != null) {
-                    RecipeDetailScreen(navController = navController, recipe = recipeObject)
+                if (selectedRecipe != null) {
+                    RecipeDetailScreen(
+                        navController = navController,
+                        recipe = selectedRecipe!!,
+                        selectRecipe = { selectedRecipe = null })
                 }
             }
             composable(
@@ -127,12 +147,19 @@ fun App() {
             ) { backStackEntry ->
                 val recipeObjectJson = backStackEntry.arguments?.getString("ingredients")
                 val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-                val listType = Types.newParameterizedType(List::class.java, IngredientItem::class.java)
+                val listType =
+                    Types.newParameterizedType(List::class.java, IngredientItem::class.java)
                 val jsonAdapter = moshi.adapter<List<IngredientItem>>(listType).lenient()
                 val recipeObject = recipeObjectJson?.let { jsonAdapter.fromJson(it) }
 
                 if (recipeObject != null) {
-                    RecipesFormScreen(navController = navController, ingredients = recipeObject, viewModel = viewModel, utensils = utensils, chefLevel = chefLevel)
+                    RecipesFormScreen(
+                        navController = navController,
+                        ingredients = recipeObject,
+                        viewModel = viewModel,
+                        utensils = utensils,
+                        chefLevel = chefLevel,
+                        setRecipes = { listRecipes -> recipes = listRecipes })
                 }
             }
         }
@@ -164,7 +191,7 @@ fun BottomNavigationBar(modifier: Modifier, navController: NavController) {
                     onClick = {
                         selectedItem = item
                         navController.navigate(item.route)
-                      },
+                    },
                     icon = { Icon(item.icon, contentDescription = "Home") },
                     label = { Text(item.label) }
                 )
