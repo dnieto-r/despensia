@@ -19,19 +19,23 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.solstix.despensia.model.Pasos
 import com.squareup.moshi.Json
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 @Composable
 fun RecipesListScreen(
     navController: NavController,
-    recipes: List<Recipe>,
-    onClick: (Recipe) -> Unit = {}
+    recipes: List<Recipe>
 ) {
     LazyColumn {
         itemsIndexed(recipes) { index, recipe ->
             RecipeCard(
                 recipe = recipe,
                 onClick = {
-                    onClick(recipe)
+                    val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+                    val jsonAdapter = moshi.adapter(Recipe::class.java).lenient()
+                    val recipeJson = jsonAdapter.toJson(it)
+                    navController.navigate("recipes/$recipeJson")
                 })
         }
     }

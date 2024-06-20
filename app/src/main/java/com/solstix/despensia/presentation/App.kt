@@ -29,6 +29,7 @@ import com.solstix.despensia.presentation.screen.PantryScreen
 import com.solstix.despensia.presentation.screen.Recipe
 import com.solstix.despensia.presentation.screen.RecipeDetailScreen
 import com.solstix.despensia.presentation.screen.RecipesFormScreen
+import com.solstix.despensia.presentation.screen.RecipesListScreen
 import com.solstix.despensia.presentation.screen.SettingsScreen
 import com.solstix.despensia.presentation.viewmodel.HomeViewModel
 import com.squareup.moshi.Moshi
@@ -68,6 +69,19 @@ fun App() {
                 SettingsScreen(
                     navController
                 )
+            }
+            composable(
+                "recipesList/{listRecipes}"
+            ) {
+                val listRecipesJson = it.arguments?.getString("listRecipes")
+                val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+                val listType = Types.newParameterizedType(List::class.java, Recipe::class.java)
+                val jsonAdapter = moshi.adapter<List<Recipe>>(listType).lenient()
+                val listRecipes = listRecipesJson?.let { jsonAdapter.fromJson(it) }
+
+                if (listRecipes != null) {
+                    RecipesListScreen(navController = navController, recipes = listRecipes)
+                }
             }
             composable(
                 "recipes/{recipe}"

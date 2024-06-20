@@ -37,6 +37,7 @@ import com.solstix.despensia.model.RecipesDto
 import com.solstix.despensia.presentation.viewmodel.HomeViewModel
 import com.solstix.despensia.util.ApiState
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,24 +55,6 @@ fun RecipesFormScreen(
     val isGluten = remember { mutableStateOf(false) }
     var duration by remember { mutableStateOf("60") }
     var people by remember { mutableStateOf("2") }
-
-    val textito = viewModel.productDetailsState.value
-
-    when(textito) {
-        is ApiState.Success<RecipesDto> ->
-            RecipesListScreen(
-                navController = navController,
-                recipes = textito.data.map(),
-                onClick = {
-                    val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-                    val jsonAdapter = moshi.adapter(Recipe::class.java).lenient()
-                    val recipeJson = jsonAdapter.toJson(it)
-                    navController.navigate("recipes/$recipeJson")
-                }
-            )
-        is ApiState.Error -> {}
-        is ApiState.Loading -> {}
-    }
 
     Column(
         Modifier
@@ -233,5 +216,33 @@ fun RecipesFormScreen(
             onClick = { viewModel.getProductDetails(ingredients) }) {
             Text(text = "Enviar")
         }
+
+        val recipes = viewModel.productDetailsState.value
+
+        when(recipes) {
+            is ApiState.Success<RecipesDto> -> {
+                val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+                val listType = Types.newParameterizedType(List::class.java, Recipe::class.java)
+                val jsonAdapter = moshi.adapter<List<Recipe>>(listType).lenient()
+                val recipesJson = jsonAdapter.toJson(recipes.data.map())
+                navController.navigate("recipesList/$recipesJson"
+                )
+            }
+            is ApiState.Error -> {}
+            is ApiState.Loading -> {}
+        }
     }
+}
+
+fun RecipesDto.map(): List<Recipe> {
+    return listOf(
+        Recipe(
+            title = title,
+            description = description,
+            duration = duration,
+            difficulty = difficulty,
+            ingredients = ingredients,
+            steps = steps
+        )
+    )
 }

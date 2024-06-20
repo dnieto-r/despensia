@@ -18,28 +18,10 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
         is ApiState.Success<RecipesDto> ->
             RecipesListScreen(
                 navController = navController,
-                recipes = textito.data.map(),
-                onClick = {
-                    val moshi = Moshi.Builder().build()
-                    val jsonAdapter = moshi.adapter(Recipe::class.java).lenient()
-                    val recipeJson = jsonAdapter.toJson(it)
-                    navController.navigate("recipes/$recipeJson")
-                }
+                recipes = textito.data.map()
             )
         is ApiState.Error -> {}
         is ApiState.Loading -> {}
     }
 }
 
-fun RecipesDto.map(): List<Recipe> {
-    return listOf(
-        Recipe(
-            title = title,
-            description = description,
-            duration = duration,
-            difficulty = difficulty,
-            ingredients = ingredients,
-            steps = steps
-        )
-    )
-}
