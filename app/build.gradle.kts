@@ -73,8 +73,8 @@ android {
 dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.14.0")
+    implementation("io.coil-kt:coil-compose:2.2.2")
     implementation("com.google.accompanist:accompanist-permissions:0.23.1")
-    implementation("io.coil-kt:coil-compose:1.3.2")
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)

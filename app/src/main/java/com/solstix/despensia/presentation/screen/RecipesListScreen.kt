@@ -1,11 +1,13 @@
 package com.solstix.despensia.presentation.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Text
@@ -13,10 +15,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.solstix.despensia.model.Pasos
 import com.squareup.moshi.Json
 import com.squareup.moshi.Moshi
@@ -57,6 +62,14 @@ fun RecipeCard(
                 onClick(recipe)
             }
     ) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(recipe.imagen).build(),
+            modifier = Modifier
+                .wrapContentSize()
+                .border(2.dp, Color.Black, shape = RectangleShape),
+            contentDescription = "comida",
+        )
         Text(
             modifier = Modifier.padding(bottom = 8.dp),
             text = recipe.title,
@@ -79,5 +92,6 @@ data class Recipe (
     val duration: String,
     val difficulty: String,
     val ingredients: List<String>,
-    val steps: List<Pasos>
+    val steps: List<Pasos>,
+    val imagen: String
 )
