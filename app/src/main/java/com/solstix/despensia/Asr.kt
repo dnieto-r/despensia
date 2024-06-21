@@ -9,6 +9,7 @@ import android.speech.SpeechRecognizer
 import android.util.Log
 
 interface MainListener {
+    fun onPartialResult(text: String?)
     fun onResult(text: String?)
 }
 
@@ -84,6 +85,7 @@ class GoogleAsr (private val context: Context, private val mainListener: MainLis
                     val text = matches?.get(0) ?: ""
                     Log.d("JORGETESTO", "Asr-listener onPartialResults: $text")
                     if (text.isNotEmpty()) {
+                        mainListener.onPartialResult(text)
                     }
                 }
 

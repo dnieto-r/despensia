@@ -54,6 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
@@ -77,6 +78,7 @@ fun PantryScreen(
     var expanded by remember { mutableStateOf(false) }
     var isTextSelected by remember { mutableStateOf(false) }
     val transition = updateTransition(targetState = expanded, label = "expandableTransition")
+    var textRecognized by remember { mutableStateOf("") }
 
     val iconAlpha by transition.animateFloat(
         transitionSpec = { tween(durationMillis = 300) },
@@ -236,12 +238,17 @@ fun PantryScreen(
                 }
                 var asr: GoogleAsr? = null
                 asr = GoogleAsr(LocalContext.current, object : MainListener {
+                    override fun onPartialResult(text: String?) {
+                        textRecognized = text ?: ""
+                    }
                     override fun onResult(text: String?) {
+                        textRecognized = text ?: ""
                         val ingredients = text?.split("y") ?: emptyList()
                         ingredients.forEach {
                             addIngredient.invoke(IngredientItem(it, 0))
                         }
                         asr?.stopAndDestroy()
+                        textRecognized = ""
                     }
                 })
                 val context = LocalContext.current
@@ -258,7 +265,13 @@ fun PantryScreen(
                         }
                     )
                 }
-                AnimatedVisibility(visible = expanded) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp, top = 8.dp, end = 80.dp, bottom = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     IconButton(
                         onClick = { requestPermission(requestPermissionLauncher) },
                         modifier = Modifier
@@ -271,8 +284,14 @@ fun PantryScreen(
                             tint = Color.Blue
                         )
                     }
+                    Text(
+                        text = textRecognized,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        maxLines = 3,
+                        color = Color.Gray
+                    )
                 }
-
 
                 Row(
                     modifier = Modifier
