@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -245,19 +246,19 @@ fun RecipesFormScreen(
                 Text(text = "Enviar")
             }
         }
-
-        when(recipes) {
-            is ApiState.Success<RecipesDto> -> {
+        if (recipes is ApiState.Loading) {
+            LoadingScreen()
+        }
+        LaunchedEffect(recipes) {
+            if (recipes is ApiState.Success<RecipesDto>) {
                 setRecipes.invoke(recipes.data.map())
+                viewModel.clearProductDetailsState()
                 navController.navigate("recipesList") {
                     popUpTo(BottomNavItem.Pantry.route) {
                         inclusive = false
                     }
                 }
             }
-            is ApiState.Error -> {}
-            is ApiState.Loading -> { LoadingScreen() }
-            is ApiState.Empty -> {}
         }
     }
 }

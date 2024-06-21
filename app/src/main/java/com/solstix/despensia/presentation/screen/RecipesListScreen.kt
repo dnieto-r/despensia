@@ -113,10 +113,12 @@ fun RecipeCard(
                 text = "${recipe.description.take(25)}...",
                 fontSize = 24.sp
             )
-            Text(
-                text = "Duración: ${recipe.duration} minutos",
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+            if (recipe.duration != "") {
+                Text(
+                    text = "Duración: ${recipe.duration} minutos",
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+            }
             Text(
                 text = "Dificultad: ${recipe.difficulty.capitalize(Locale.US)}",
                 modifier = Modifier

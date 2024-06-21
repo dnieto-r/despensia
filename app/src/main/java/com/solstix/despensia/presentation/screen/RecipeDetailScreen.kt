@@ -1,7 +1,9 @@
 package com.solstix.despensia.presentation.screen
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -10,12 +12,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 
 @Composable
 fun RecipeDetailScreen(
@@ -35,6 +41,15 @@ fun RecipeDetailScreen(
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(recipe.imagen).build(),
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(bottom = 5.dp)
+                .border(2.dp, Color.Black, shape = RectangleShape),
+            contentDescription = "comida",
+        )
         Text(
             text = recipe.title.uppercase(),
             fontSize = 28.sp,
@@ -47,10 +62,12 @@ fun RecipeDetailScreen(
             fontSize = 18.sp
         )
         Divider()
-        Text(
-            text = "Duración: ${recipe.duration} minutos",
-            fontSize = 22.sp
-        )
+        if (recipe.duration != "") {
+            Text(
+                text = "Duración: ${recipe.duration} minutos",
+                fontSize = 22.sp
+            )
+        }
         Text(
             text = "Dificultad: ${recipe.difficulty}",
             fontSize = 22.sp

@@ -1,7 +1,6 @@
 package com.solstix.despensia.presentation.screen
 
 import android.Manifest
-import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -63,9 +62,6 @@ import com.solstix.despensia.MainActivity
 import com.solstix.despensia.MainListener
 import com.solstix.despensia.PermissionsManager
 import com.solstix.despensia.R
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 data class IngredientItem(val name: String, val icon: Int, val isChecked: Boolean = false)
 
@@ -116,14 +112,14 @@ fun PantryScreen(
                         end.linkTo(parent.end)
                         height = Dimension.fillToConstraints
                     },
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 items(storedItemList.size) {
                     val checkedState = remember { mutableStateOf(storedItemList[it].isChecked) }
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Image(
-                            painter = painterResource(id = R.drawable.apple),
+                            painter = painterResource(id = R.drawable.shopping),
                             contentDescription = storedItemList[it].name,
                             modifier = Modifier
                                 .height(30.dp)
@@ -132,12 +128,12 @@ fun PantryScreen(
                         Box(
                             Modifier
                                 .weight(1f)
-                                .clip(RoundedCornerShape(20.dp))
+                                .clip(RoundedCornerShape(16.dp))
                                 .background(Color(0xFF919F88))
                         ) {
                             Text(
-                                modifier = Modifier.padding(10.dp),
-                                text = storedItemList[it].name
+                                modifier = Modifier.padding(vertical = 12.dp).padding(horizontal = 18.dp),
+                                text = storedItemList[it].name.capitalize()
                             )
                         }
                         Box(
@@ -153,12 +149,7 @@ fun PantryScreen(
 
             FloatingActionButton(
                 onClick = {
-                    val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-                    val listType = Types.newParameterizedType(List::class.java, IngredientItem::class.java)
-                    val jsonAdapter = moshi.adapter<List<IngredientItem>>(listType).lenient()
-
-                    val recipeJson = jsonAdapter.toJson(storedItemList)
-                    navController.navigate("recipes_form/$recipeJson")
+                    navController.navigate("recipes_form")
                 },
                 shape = CircleShape,
                 modifier = Modifier
@@ -201,7 +192,6 @@ fun PantryScreen(
                 var asr: GoogleAsr? = null
                 asr = GoogleAsr(LocalContext.current, object : MainListener {
                     override fun onResult(text: String?) {
-                        Log.d("JORGETESTO", "MainActivity onResult: $text")
                         val ingredients = text?.split("y") ?: emptyList()
                         ingredients.forEach {
                             addIngredient.invoke(IngredientItem(it, 0))
@@ -220,7 +210,6 @@ fun PantryScreen(
                         permission,
                         acceptedAction = {
                             initAsr(asr = asr)
-                            Log.d("JORGETESTO", "MainActivity permisssion accepted")
                         }
                     )
                 }

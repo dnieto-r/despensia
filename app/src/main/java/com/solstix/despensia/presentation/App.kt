@@ -35,9 +35,7 @@ import com.solstix.despensia.presentation.screen.RecipesFormScreen
 import com.solstix.despensia.presentation.screen.RecipesListScreen
 import com.solstix.despensia.presentation.screen.SettingsScreen
 import com.solstix.despensia.presentation.viewmodel.HomeViewModel
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.solstix.despensia.util.ApiState
 
 @Composable
 fun App() {
@@ -112,7 +110,15 @@ fun App() {
             composable("image_selector") {
                 ImageSelectorScreen(
                     navController,
-                    viewModel
+                    viewModel,
+                    addIngredients = { apiState ->
+                        if (apiState is ApiState.Success) {
+                            apiState.data.ingredientes.forEach {
+                                itemList.add(IngredientItem(it, 0, false))
+                            }
+                        }
+                        navController.popBackStack()
+                    }
                 )
             }
             composable(
@@ -143,24 +149,15 @@ fun App() {
                 }
             }
             composable(
-                "recipes_form/{ingredients}"
+                "recipes_form"
             ) { backStackEntry ->
-                val recipeObjectJson = backStackEntry.arguments?.getString("ingredients")
-                val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-                val listType =
-                    Types.newParameterizedType(List::class.java, IngredientItem::class.java)
-                val jsonAdapter = moshi.adapter<List<IngredientItem>>(listType).lenient()
-                val recipeObject = recipeObjectJson?.let { jsonAdapter.fromJson(it) }
-
-                if (recipeObject != null) {
                     RecipesFormScreen(
                         navController = navController,
-                        ingredients = recipeObject,
+                        ingredients = itemList,
                         viewModel = viewModel,
                         utensils = utensils,
                         chefLevel = chefLevel,
                         setRecipes = { listRecipes -> recipes = listRecipes })
-                }
             }
         }
         BottomNavigationBar(Modifier.height(50.dp), navController)

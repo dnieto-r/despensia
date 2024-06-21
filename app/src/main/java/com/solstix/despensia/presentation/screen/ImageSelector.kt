@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,9 +14,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,11 +32,16 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
+import com.solstix.despensia.model.ImageDto
 import com.solstix.despensia.presentation.viewmodel.HomeViewModel
+import com.solstix.despensia.util.ApiState
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun ImageSelectorScreen(navController: NavController, viewModel: HomeViewModel) {
+fun ImageSelectorScreen(navController: NavController,
+                        viewModel: HomeViewModel,
+                        addIngredients: (ApiState<ImageDto>) -> Unit
+                        ) {
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
 
@@ -54,6 +60,13 @@ fun ImageSelectorScreen(navController: NavController, viewModel: HomeViewModel) 
         } else {
             // Permission Denied: Do something
             Log.d("ExampleScreen","PERMISSION DENIED")
+        }
+    }
+
+    LaunchedEffect(key1 = viewModel.imageDetailsState.value) {
+        if (viewModel.imageDetailsState.value is ApiState.Success) {
+            addIngredients(viewModel.imageDetailsState.value)
+            viewModel.clearImageDetailsState()
         }
     }
 
@@ -84,26 +97,34 @@ fun ImageSelectorScreen(navController: NavController, viewModel: HomeViewModel) 
                     modifier = Modifier.size(300.dp)
                 )
             }
-
-            Button(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .background(Color.Green)
-                    .padding(top = 32.dp),
-                onClick = {
-                    imageUri?.let {
-                        val file = createTempFile()
-                        it.let { context.contentResolver.openInputStream(it) }.use { input ->
-                            file.outputStream().use { output ->
-                                input?.copyTo(output)
+            if (imageUri != null && viewModel.imageDetailsState.value !is ApiState.Loading) {
+                Button(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 32.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFF7d26),
+                        contentColor = Color.White
+                    ),
+                    onClick = {
+                        imageUri?.let {
+                            val file = createTempFile()
+                            it.let { context.contentResolver.openInputStream(it) }.use { input ->
+                                file.outputStream().use { output ->
+                                    input?.copyTo(output)
+                                }
+                            }
+                            viewModel.getIngredients(file) {
+                                viewModel.clearImageDetailsState()
+                                file.delete()
                             }
                         }
-                        viewModel.getIngredients(file) {
-                            file.delete()
-                        }
-                    }
-                }) {
-                Text(text = "Identificar elementos")
+                    }) {
+                    Text(text = "Identificar ingredientes")
+                }
+            }
+            if (viewModel.imageDetailsState.value is ApiState.Loading) {
+                LoadingScreen()
             }
         }
     }

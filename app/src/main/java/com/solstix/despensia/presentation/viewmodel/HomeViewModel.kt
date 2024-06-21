@@ -1,6 +1,5 @@
 package com.solstix.despensia.presentation.viewmodel
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +27,7 @@ class HomeViewModel @Inject constructor(
     private val _imageDetailsState: MutableState<ApiState<ImageDto>> =
         mutableStateOf(ApiState.Empty)
     val productDetailsState: State<ApiState<RecipesDto>> get() = _productDetailsState
+    val imageDetailsState: State<ApiState<ImageDto>> get() = _imageDetailsState
 
     fun getProductDetails(
         ingredients: List<IngredientItem>,
@@ -63,7 +63,6 @@ class HomeViewModel @Inject constructor(
     ) {
         _imageDetailsState.value = ApiState.Loading
         viewModelScope.launch(Dispatchers.IO) {
-            Log.d("DEVUGER", "getIngredients: ${image.isFile}")
             _imageDetailsState.value = repository.getIngredientsFromImage(
                 image
             ).also {
@@ -71,5 +70,13 @@ class HomeViewModel @Inject constructor(
                 removeImage.invoke()
             }
         }
+    }
+
+    fun clearProductDetailsState() {
+        _productDetailsState.value = ApiState.Empty
+    }
+
+    fun clearImageDetailsState() {
+        _imageDetailsState.value = ApiState.Empty
     }
 }
