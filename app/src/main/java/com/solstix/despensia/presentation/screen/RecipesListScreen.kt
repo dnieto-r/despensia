@@ -30,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -94,8 +93,7 @@ fun RecipeCard(
                     .data(recipe.imagen).build(),
                 modifier = Modifier
                     .wrapContentSize()
-                    .padding(bottom = 5.dp)
-                    .border(2.dp, Color.Black, shape = RectangleShape),
+                    .padding(bottom = 5.dp),
                 contentDescription = "comida",
             )
             Text(

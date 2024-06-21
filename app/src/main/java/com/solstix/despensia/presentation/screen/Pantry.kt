@@ -93,7 +93,20 @@ fun PantryScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Ingredientes disponibles:", fontWeight = FontWeight.Bold) }) },
+        topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            if (storedItemList.isNotEmpty()) {
+                                "Ingredientes disponibles:"
+                            } else {
+                                 "DespensIA"
+                            },
+                            fontWeight = FontWeight.Bold
+                        )
+                    })
+
+         },
     ) {
         ConstraintLayout(
             modifier = Modifier
@@ -101,49 +114,81 @@ fun PantryScreen(
                 .padding(it)
                 .padding(8.dp)
         ) {
-            val (messages, chatBox, chefButton) = createRefs()
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .constrainAs(messages) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(chatBox.top)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        height = Dimension.fillToConstraints
-                    },
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(storedItemList.size) {
-                    val checkedState = remember { mutableStateOf(storedItemList[it].isChecked) }
+            val (empty, messages, chatBox, chefButton) = createRefs()
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(
-                            painter = painterResource(id = R.drawable.shopping),
-                            contentDescription = storedItemList[it].name,
-                            modifier = Modifier
-                                .height(30.dp)
-                                .padding(end = 10.dp)
-                        )
-                        Box(
-                            Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(Color(0xFF919F88))
-                        ) {
-                            Text(
-                                modifier = Modifier.padding(vertical = 12.dp).padding(horizontal = 18.dp),
-                                text = storedItemList[it].name.capitalize()
+            if (storedItemList.isNotEmpty()) {
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .constrainAs(messages) {
+                            top.linkTo(parent.top)
+                            bottom.linkTo(chatBox.top)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                            height = Dimension.fillToConstraints
+                        },
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    items(storedItemList.size) {
+                        val checkedState = remember { mutableStateOf(storedItemList[it].isChecked) }
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Image(
+                                painter = painterResource(id = R.drawable.shopping),
+                                contentDescription = storedItemList[it].name,
+                                modifier = Modifier
+                                    .height(30.dp)
+                                    .padding(end = 10.dp)
                             )
-                        }
-                        Box(
-                            modifier = Modifier.width(40.dp).padding(start = 7.dp).clickable {
-                                removeIngredient.invoke(storedItemList[it])
+                            Box(
+                                Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(Color(0xFF919F88))
+                            ) {
+                                Text(
+                                    modifier = Modifier.padding(vertical = 12.dp)
+                                        .padding(horizontal = 18.dp),
+                                    text = storedItemList[it].name.capitalize()
+                                )
                             }
-                        ) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red)
+                            Box(
+                                modifier = Modifier.width(40.dp).padding(start = 7.dp).clickable {
+                                    removeIngredient.invoke(storedItemList[it])
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "Delete",
+                                    tint = Color.Red
+                                )
+                            }
                         }
                     }
+                }
+            } else {
+                Column(
+                    Modifier.constrainAs(empty) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    },
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "No hay ingredientes en la despensa",
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.despensa),
+                        contentDescription = "",
+                        modifier = Modifier
+                            .height(120.dp)
+                            .padding(top= 15.dp, end = 10.dp)
+                    )
                 }
             }
 
@@ -247,6 +292,8 @@ fun PantryScreen(
                                 modifier = Modifier
                                     .width(40.dp)
                                     .height(80.dp)
+                                    .background(Color.Transparent)
+
                                     .clickable(onClick = {
                                         expanded = !expanded
                                     }),
@@ -263,6 +310,8 @@ fun PantryScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .padding(start = 0.dp)
+                                    .background(Color.Transparent)
+
                                     .fillMaxHeight(),
                                 placeholder = { Text("Introduce ingredientes") },
                                 colors = TextFieldDefaults.textFieldColors(
