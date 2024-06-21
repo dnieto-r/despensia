@@ -94,8 +94,7 @@ fun RecipeCard(
                     .data(recipe.imagen).build(),
                 modifier = Modifier
                     .wrapContentSize()
-                    .padding(bottom = 5.dp)
-                    .border(2.dp, Color.Black, shape = RectangleShape),
+                    .padding(bottom = 5.dp),
                 contentDescription = "comida",
             )
             Text(

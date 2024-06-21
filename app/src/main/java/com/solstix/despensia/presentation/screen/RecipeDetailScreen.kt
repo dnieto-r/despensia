@@ -98,11 +98,11 @@ fun RecipeDetailScreen(
                 fontStyle = FontStyle.Italic,
                 modifier = Modifier.padding(bottom=4.dp)
             )
-            it.instructions.forEach {
+            it.instructions.forEach { instruction ->
                 Text(
-                    text = it,
+                    text = instruction,
                     fontSize = 18.sp,
-                    modifier = Modifier.padding(start=4.dp, bottom=8.dp)
+                    modifier = Modifier.padding(start=4.dp, bottom=if(instruction == it.instructions.last()) 12.dp else 8.dp)
                 )
             }
         }
