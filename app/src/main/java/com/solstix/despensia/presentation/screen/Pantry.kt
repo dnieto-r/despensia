@@ -18,12 +18,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -119,10 +119,8 @@ fun PantryScreen(
             val (empty, messages, chatBox, chefButton) = createRefs()
 
             if (storedItemList.isNotEmpty()) {
-
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxWidth()
                         .constrainAs(messages) {
                             top.linkTo(parent.top)
                             bottom.linkTo(chatBox.top)
@@ -133,8 +131,6 @@ fun PantryScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     items(storedItemList.size) {
-                        val checkedState = remember { mutableStateOf(storedItemList[it].isChecked) }
-
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
                                 painter = painterResource(id = R.drawable.shopping),
@@ -201,6 +197,7 @@ fun PantryScreen(
                 shape = CircleShape,
                 modifier = Modifier
                     .size(56.dp)
+                    .wrapContentSize()
                     .constrainAs(chefButton) {
                         bottom.linkTo(parent.bottom, margin = 70.dp)
                         end.linkTo(parent.end)
@@ -217,6 +214,7 @@ fun PantryScreen(
 
             Column(
                 Modifier
+                    .wrapContentSize()
                     .constrainAs(chatBox) {
                         bottom.linkTo(parent.bottom)
                         start.linkTo(parent.start)
@@ -267,7 +265,7 @@ fun PantryScreen(
                 }
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .wrapContentSize()
                         .padding(top = 8.dp, end = 80.dp, bottom = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -296,7 +294,7 @@ fun PantryScreen(
                 Row(
                     modifier = Modifier
                         .height(58.dp)
-                        .fillMaxWidth(),
+                        .background(Color.Transparent),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
@@ -312,7 +310,6 @@ fun PantryScreen(
                                     .width(40.dp)
                                     .height(80.dp)
                                     .background(Color.Transparent)
-
                                     .clickable(onClick = {
                                         expanded = !expanded
                                     }),
@@ -330,7 +327,6 @@ fun PantryScreen(
                                     .weight(1f)
                                     .padding(start = 0.dp)
                                     .background(Color.Transparent)
-
                                     .fillMaxHeight(),
                                 placeholder = { Text("Introduce ingredientes") },
                                 colors = TextFieldDefaults.textFieldColors(
