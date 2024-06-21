@@ -101,7 +101,7 @@ def comparar_diccionarios(d1, d2):
                 return False
     return True
 
-def generate_prompt(ingredientes, equipamiento, perfil, comensales, dificultad, duracion, intolerancias, receta_repetida=False):
+def generate_prompt(ingredientes, equipamiento, perfil, comensales, dificultad, duracion, intolerancias, receta_repetida=False, cantidad=1):
     # perfil de cocinero
     perfiles = {
         "basico": "Mi perfil como cocinero es el siguiente: tengo poca experiencia. Sé cortar y pelar ingredientes comunes. Normalmente hago recetas hirviendo o pasando por la plancha los ingredientes. El equipo con el que suelo trabajar son ollas, sartenes y cuchillos.",
@@ -126,7 +126,10 @@ def generate_prompt(ingredientes, equipamiento, perfil, comensales, dificultad, 
     }
     dificultad_elegida = dificultades[dificultad]
 
-    propiedades_receta = f"Estoy buscando una receta {dificultad_elegida}, para {comensales} personas que se pueda hacer en menos de {duracion} minutos."
+    if cantidad != "1":
+        propiedades_receta = f"Estoy buscando {cantidad} recetas {dificultad_elegida}, para {comensales} personas que se pueda hacer en menos de {duracion} minutos."
+    else:
+        propiedades_receta = f"Estoy buscando una receta {dificultad_elegida}, para {comensales} personas que se pueda hacer en menos de {duracion} minutos."
 
     if intolerancias:
         intolerancias = ', '.join(intolerancias)
@@ -162,6 +165,10 @@ def generar_receta():
     global datos_ultima_receta
     global titulo_ultima_receta
     datos_receta = request.get_json()
+    try:
+        cantidad = datos_receta["cantidad"]
+    except KeyError:
+        cantidad = "1"
     datos_necesarios = ["ingredientes", "equipamiento", "perfil", "comensales", "dificultad", "duracion", "intolerancias"]
 
     for dato in datos_necesarios: 
@@ -182,7 +189,7 @@ def generar_receta():
     else:
         receta_repetida = False
     
-    prompt = generate_prompt(datos_receta["ingredientes"], datos_receta["equipamiento"], datos_receta["perfil"], datos_receta["comensales"], datos_receta["dificultad"], datos_receta["duracion"], datos_receta["intolerancias"], receta_repetida)
+    prompt = generate_prompt(datos_receta["ingredientes"], datos_receta["equipamiento"], datos_receta["perfil"], datos_receta["comensales"], datos_receta["dificultad"], datos_receta["duracion"], datos_receta["intolerancias"], receta_repetida, cantidad)
     
     # log para imprimir el prompt enviado
     print(f"\nLOGGER: Prompt:\n\n {prompt}")
@@ -201,35 +208,68 @@ def generar_receta():
         print(f'\nLOGGER: RESPUESTA IA ({type(receta)}):\n\n {receta}')
         logging.info(f"LOGGER: RESPUESTA IA ({type(receta)}): {receta}")
 
-    # Generamos la imagen del plato
-    if mock_imagen:
-        imagen = imagen_mock
-    else:
-        receta_descripcion = receta["descripcion"]
-        prompt_imagen = f"Quiero una imagen de la receta {receta_descripcion} en un plato negro y con efecto realista y sin sombra."
-        print(f"\nLOGGER: Prompt imagen:\n\n {prompt_imagen}")
-        logging.info(f"LOGGER: Prompt imagen: {prompt_imagen}")
-        imagen = consultar_azure_openai(prompt_imagen, AZURE_ENDPOINT_IMAGES, AZURE_OPENAI_KEY_IMAGES, 'image')
-    url_imagen = imagen['data'][0]['url']
-    
-    # recordamos campos que vienen de la app
-    receta["dificultad"] = datos_receta["dificultad"]
-    receta["duracion"] = datos_receta["duracion"]
+    if cantidad != "1":
+        for each_receta in receta:
+            # Generamos la imagen del plato
+            if mock_imagen:
+                imagen = imagen_mock
+            else:
+                receta_descripcion = each_receta["descripcion"]
+                prompt_imagen = f"Quiero una imagen de la receta {receta_descripcion} en un plato negro y con efecto realista y sin sombra."
+                print(f"\nLOGGER: Prompt imagen:\n\n {prompt_imagen}")
+                logging.info(f"LOGGER: Prompt imagen: {prompt_imagen}")
+                imagen = consultar_azure_openai(prompt_imagen, AZURE_ENDPOINT_IMAGES, AZURE_OPENAI_KEY_IMAGES, 'image')
+            url_imagen = imagen['data'][0]['url']
+            
+            # recordamos campos que vienen de la app
+            each_receta["dificultad"] = datos_receta["dificultad"]
+            each_receta["duracion"] = datos_receta["duracion"]
 
-    titulo_receta = receta["titulo"]
-    print(f"\nLOGGER: Receta generada: {titulo_receta}")
-    print(f"\nLOGGER: Imagen generada: {url_imagen}")
-    logging.info(f"LOGGER: Receta generada: {titulo_receta}")
-    logging.info(f"LOGGER: Imagen generada: {url_imagen}")
-    try:
-        for r in recetas:
-            if r["titulo"] == titulo_receta:
-                return r, 200
-    except KeyError:
-        pass
-    receta["favorita"] = False
-    receta["imagen"] = url_imagen
-    recetas.append(receta)
+            titulo_receta = each_receta["titulo"]
+            print(f"\nLOGGER: Receta generada: {titulo_receta}")
+            print(f"\nLOGGER: Imagen generada: {url_imagen}")
+            logging.info(f"LOGGER: Receta generada: {titulo_receta}")
+            logging.info(f"LOGGER: Imagen generada: {url_imagen}")
+            try:
+                for r in recetas:
+                    if r["titulo"] == titulo_receta:
+                        return r, 200
+            except KeyError:
+                pass
+            each_receta["favorita"] = False
+            each_receta["imagen"] = url_imagen
+            recetas.append(each_receta)
+    else:
+        # Generamos la imagen del plato
+        if mock_imagen:
+            imagen = imagen_mock
+        else:
+            receta_descripcion = receta["descripcion"]
+            prompt_imagen = f"Quiero una imagen de la receta {receta_descripcion} en un plato negro y con efecto realista y sin sombra."
+            print(f"\nLOGGER: Prompt imagen:\n\n {prompt_imagen}")
+            logging.info(f"LOGGER: Prompt imagen: {prompt_imagen}")
+            imagen = consultar_azure_openai(prompt_imagen, AZURE_ENDPOINT_IMAGES, AZURE_OPENAI_KEY_IMAGES, 'image')
+        url_imagen = imagen['data'][0]['url']
+        
+        # recordamos campos que vienen de la app
+        receta["dificultad"] = datos_receta["dificultad"]
+        receta["duracion"] = datos_receta["duracion"]
+
+        titulo_receta = receta["titulo"]
+        print(f"\nLOGGER: Receta generada: {titulo_receta}")
+        print(f"\nLOGGER: Imagen generada: {url_imagen}")
+        logging.info(f"LOGGER: Receta generada: {titulo_receta}")
+        logging.info(f"LOGGER: Imagen generada: {url_imagen}")
+        try:
+            for r in recetas:
+                if r["titulo"] == titulo_receta:
+                    return r, 200
+        except KeyError:
+            pass
+        receta["favorita"] = False
+        receta["imagen"] = url_imagen
+        recetas.append(receta)
+        
     # Guardo los datos y el nombre de la última receta generada, por si vuelven a pedirme lo mismo no repetir recetas
     datos_ultima_receta = datos_receta
     titulo_ultima_receta = titulo_receta
