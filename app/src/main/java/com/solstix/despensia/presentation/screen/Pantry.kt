@@ -268,7 +268,7 @@ fun PantryScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 8.dp, top = 8.dp, end = 80.dp, bottom = 8.dp),
+                        .padding(top = 8.dp, end = 80.dp, bottom = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
