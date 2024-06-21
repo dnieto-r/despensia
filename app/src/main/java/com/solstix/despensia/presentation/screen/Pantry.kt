@@ -54,6 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
@@ -77,6 +78,7 @@ fun PantryScreen(
     var expanded by remember { mutableStateOf(false) }
     var isTextSelected by remember { mutableStateOf(false) }
     val transition = updateTransition(targetState = expanded, label = "expandableTransition")
+    var textRecognized by remember { mutableStateOf("") }
 
     val iconAlpha by transition.animateFloat(
         transitionSpec = { tween(durationMillis = 300) },
@@ -93,7 +95,20 @@ fun PantryScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Ingredientes disponibles:", fontWeight = FontWeight.Bold) }) },
+        topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            if (storedItemList.isNotEmpty()) {
+                                "Ingredientes disponibles:"
+                            } else {
+                                 "DespensIA"
+                            },
+                            fontWeight = FontWeight.Bold
+                        )
+                    })
+
+         },
     ) {
         ConstraintLayout(
             modifier = Modifier
@@ -101,49 +116,81 @@ fun PantryScreen(
                 .padding(it)
                 .padding(8.dp)
         ) {
-            val (messages, chatBox, chefButton) = createRefs()
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .constrainAs(messages) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(chatBox.top)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        height = Dimension.fillToConstraints
-                    },
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(storedItemList.size) {
-                    val checkedState = remember { mutableStateOf(storedItemList[it].isChecked) }
+            val (empty, messages, chatBox, chefButton) = createRefs()
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(
-                            painter = painterResource(id = R.drawable.shopping),
-                            contentDescription = storedItemList[it].name,
-                            modifier = Modifier
-                                .height(30.dp)
-                                .padding(end = 10.dp)
-                        )
-                        Box(
-                            Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(Color(0xFF919F88))
-                        ) {
-                            Text(
-                                modifier = Modifier.padding(vertical = 12.dp).padding(horizontal = 18.dp),
-                                text = storedItemList[it].name.capitalize()
+            if (storedItemList.isNotEmpty()) {
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .constrainAs(messages) {
+                            top.linkTo(parent.top)
+                            bottom.linkTo(chatBox.top)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                            height = Dimension.fillToConstraints
+                        },
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    items(storedItemList.size) {
+                        val checkedState = remember { mutableStateOf(storedItemList[it].isChecked) }
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Image(
+                                painter = painterResource(id = R.drawable.shopping),
+                                contentDescription = storedItemList[it].name,
+                                modifier = Modifier
+                                    .height(30.dp)
+                                    .padding(end = 10.dp)
                             )
-                        }
-                        Box(
-                            modifier = Modifier.width(40.dp).padding(start = 7.dp).clickable {
-                                removeIngredient.invoke(storedItemList[it])
+                            Box(
+                                Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(Color(0xFF919F88))
+                            ) {
+                                Text(
+                                    modifier = Modifier.padding(vertical = 12.dp)
+                                        .padding(horizontal = 18.dp),
+                                    text = storedItemList[it].name.capitalize()
+                                )
                             }
-                        ) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red)
+                            Box(
+                                modifier = Modifier.width(40.dp).padding(start = 7.dp).clickable {
+                                    removeIngredient.invoke(storedItemList[it])
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "Delete",
+                                    tint = Color.Red
+                                )
+                            }
                         }
                     }
+                }
+            } else {
+                Column(
+                    Modifier.constrainAs(empty) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    },
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "No hay ingredientes en la despensa",
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.despensa),
+                        contentDescription = "",
+                        modifier = Modifier
+                            .height(120.dp)
+                            .padding(top= 15.dp, end = 10.dp)
+                    )
                 }
             }
 
@@ -191,12 +238,17 @@ fun PantryScreen(
                 }
                 var asr: GoogleAsr? = null
                 asr = GoogleAsr(LocalContext.current, object : MainListener {
+                    override fun onPartialResult(text: String?) {
+                        textRecognized = text ?: ""
+                    }
                     override fun onResult(text: String?) {
+                        textRecognized = text ?: ""
                         val ingredients = text?.split("y") ?: emptyList()
                         ingredients.forEach {
                             addIngredient.invoke(IngredientItem(it, 0))
                         }
                         asr?.stopAndDestroy()
+                        textRecognized = ""
                     }
                 })
                 val context = LocalContext.current
@@ -213,7 +265,13 @@ fun PantryScreen(
                         }
                     )
                 }
-                AnimatedVisibility(visible = expanded) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp, end = 80.dp, bottom = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     IconButton(
                         onClick = { requestPermission(requestPermissionLauncher) },
                         modifier = Modifier
@@ -226,8 +284,14 @@ fun PantryScreen(
                             tint = Color.Blue
                         )
                     }
+                    Text(
+                        text = textRecognized,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        maxLines = 3,
+                        color = Color.Gray
+                    )
                 }
-
 
                 Row(
                     modifier = Modifier
@@ -247,6 +311,8 @@ fun PantryScreen(
                                 modifier = Modifier
                                     .width(40.dp)
                                     .height(80.dp)
+                                    .background(Color.Transparent)
+
                                     .clickable(onClick = {
                                         expanded = !expanded
                                     }),
@@ -263,6 +329,8 @@ fun PantryScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .padding(start = 0.dp)
+                                    .background(Color.Transparent)
+
                                     .fillMaxHeight(),
                                 placeholder = { Text("Introduce ingredientes") },
                                 colors = TextFieldDefaults.textFieldColors(
